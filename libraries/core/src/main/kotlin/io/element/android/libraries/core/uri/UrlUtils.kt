@@ -7,11 +7,11 @@
 
 package io.element.android.libraries.core.uri
 
-import java.net.URI
+import java.net.URL
 
 fun String.isValidUrl(): Boolean {
     return try {
-        URI(this).toURL()
+        URL(this)
         true
     } catch (t: Throwable) {
         false

@@ -26,12 +26,6 @@ android {
     }
 }
 
-kotlin {
-    jvmToolchain {
-        languageVersion = Versions.javaLanguageVersion
-    }
-}
-
 dependencies {
     commonDependencies(libs)
     coreLibraryDesugaring(libs.android.desugar)
