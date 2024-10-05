@@ -54,6 +54,7 @@ import io.element.android.libraries.designsystem.theme.components.IconSource
 import io.element.android.libraries.designsystem.theme.components.Text
 import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.collections.immutable.ImmutableList
+import timber.log.Timber
 
 @Composable
 fun RoomListContentView(
@@ -230,6 +231,11 @@ private fun RoomsViewList(
             )
             if (index != state.summaries.lastIndex) {
                 HorizontalDivider()
+            }
+            Timber.i("wxt, Room archive: ", index , room.isArchived)
+            Timber.i("wxt, Room archive: ${room.isArchived}")
+            if (room.isArchived ){
+                Text("AAAA")
             }
         }
     }

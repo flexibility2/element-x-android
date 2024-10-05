@@ -46,6 +46,7 @@ class RoomSummaryDetailsFactory(
             isFavorite = roomInfo.isFavourite,
             currentUserMembership = roomInfo.membership.map(),
             heroes = roomInfo.elementHeroes(),
+            isArchived = false
         )
     }
 }

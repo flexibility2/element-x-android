@@ -54,6 +54,7 @@ class RoomListRoomSummaryFactory @Inject constructor(
             heroes = details.heroes.map { user ->
                 user.getAvatarData(size = AvatarSize.RoomListItem)
             }.toImmutableList(),
+            isArchived = details.isArchived
         )
     }
 }

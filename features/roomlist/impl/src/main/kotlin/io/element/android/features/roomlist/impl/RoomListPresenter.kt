@@ -32,6 +32,7 @@ import io.element.android.features.leaveroom.api.LeaveRoomPresenter
 import io.element.android.features.logout.api.direct.DirectLogoutPresenter
 import io.element.android.features.networkmonitor.api.NetworkMonitor
 import io.element.android.features.networkmonitor.api.NetworkStatus
+import io.element.android.features.roomlist.impl.RoomListEvents.ContextMenuEvents
 import io.element.android.features.roomlist.impl.datasource.RoomListDataSource
 import io.element.android.features.roomlist.impl.filters.RoomListFiltersState
 import io.element.android.features.roomlist.impl.model.RoomListRoomSummary
@@ -71,6 +72,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 private const val EXTENDED_RANGE_SIZE = 40
@@ -121,6 +123,7 @@ class RoomListPresenter @Inject constructor(
 
         val directLogoutState = logoutPresenter.present()
 
+        var markAsArchiveRoomId by remember { mutableStateOf<RoomId?>(null) }
         fun handleEvents(event: RoomListEvents) {
             when (event) {
                 is RoomListEvents.UpdateVisibleRange -> coroutineScope.launch {
@@ -149,12 +152,17 @@ class RoomListPresenter @Inject constructor(
                         AcceptDeclineInviteEvents.DeclineInvite(event.roomListRoomSummary.toInviteData())
                     )
                 }
+                is RoomListEvents.MarkAsArchive ->{
+                    markAsArchiveRoomId = event.roomId;
+                    Timber.d("wxt1, markAsArchiveRoomId: $markAsArchiveRoomId")
+                }
             }
         }
+        Timber.d("wxt2, markAsArchiveRoomId: $markAsArchiveRoomId")
 
         val snackbarMessage by snackbarDispatcher.collectSnackbarMessageAsState()
 
-        val contentState = roomListContentState(securityBannerDismissed)
+        val contentState = roomListContentState(securityBannerDismissed, markAsArchiveRoomId)
 
         return RoomListState(
             matrixUser = matrixUser.value,
@@ -203,7 +211,11 @@ class RoomListPresenter @Inject constructor(
     @Composable
     private fun roomListContentState(
         securityBannerDismissed: Boolean,
+        markAsArchiveRoomId: RoomId?
     ): RoomListContentState {
+        Timber.i("wxt, markAsArchiveRoomId: ", markAsArchiveRoomId)
+        Timber.i("wxt, markAsArchiveRoomId: $markAsArchiveRoomId")
+        Timber.d("wxt, markAsArchiveRoomId: $markAsArchiveRoomId")
         val roomSummaries by produceState(initialValue = AsyncData.Loading()) {
             roomListDataSource.allRooms.collect { value = AsyncData.Success(it) }
         }
@@ -229,10 +241,17 @@ class RoomListPresenter @Inject constructor(
             showSkeleton -> RoomListContentState.Skeleton(count = 16)
             else -> {
                 val securityBannerState by securityBannerState(securityBannerDismissed, needsSlidingSyncMigration)
+                val updatedSummaries = roomSummaries.dataOrNull().orEmpty().map { summary ->
+                    if (summary.roomId == markAsArchiveRoomId) {
+                        summary.copy(isArchived = true)
+                    } else {
+                        summary
+                    }
+                }.toPersistentList()
                 RoomListContentState.Rooms(
                     securityBannerState = securityBannerState,
                     fullScreenIntentPermissionsState = fullScreenIntentPermissionsPresenter.present(),
-                    summaries = roomSummaries.dataOrNull().orEmpty().toPersistentList()
+                    summaries = updatedSummaries
                 )
             }
         }

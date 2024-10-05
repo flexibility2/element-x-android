@@ -34,6 +34,7 @@ data class RoomSummary(
     val isFavorite: Boolean,
     val currentUserMembership: CurrentUserMembership,
     val heroes: List<MatrixUser>,
+    val isArchived: Boolean
 ) {
     val lastMessageTimestamp = lastMessage?.originServerTs
     val aliases: List<RoomAlias>

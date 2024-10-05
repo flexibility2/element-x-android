@@ -63,4 +63,5 @@ fun aRoomSummaryDetails(
     isFavorite = isFavorite,
     currentUserMembership = currentUserMembership,
     heroes = heroes,
+    isArchived = false
 )

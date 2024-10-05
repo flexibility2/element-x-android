@@ -155,4 +155,5 @@ internal fun aRoomListRoomSummary(
     displayType = displayType,
     canonicalAlias = canonicalAlias,
     heroes = heroes.toImmutableList(),
+    isArchived = false
 )

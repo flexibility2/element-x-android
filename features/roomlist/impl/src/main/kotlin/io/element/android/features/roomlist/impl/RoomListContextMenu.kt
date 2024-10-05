@@ -61,6 +61,10 @@ fun RoomListContextMenu(
             onFavoriteChange = { isFavorite ->
                 eventSink(RoomListEvents.SetRoomIsFavorite(contextMenu.roomId, isFavorite))
             },
+            onRoomArchiveClick = {
+                eventSink(RoomListEvents.HideContextMenu)
+                eventSink(RoomListEvents.MarkAsArchive(contextMenu.roomId))
+            }
         )
     }
 }
@@ -73,6 +77,7 @@ private fun RoomListModalBottomSheetContent(
     onFavoriteChange: (isFavorite: Boolean) -> Unit,
     onRoomMarkReadClick: () -> Unit,
     onRoomMarkUnreadClick: () -> Unit,
+    onRoomArchiveClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -177,6 +182,22 @@ private fun RoomListModalBottomSheetContent(
             ),
             style = ListItemStyle.Destructive,
         )
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = "Archive",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            },
+            modifier = Modifier.clickable { onRoomArchiveClick() },
+            leadingContent = ListItemContent.Icon(
+                iconSource = IconSource.Vector(
+                    CompoundIcons.Home(),
+                    contentDescription = "Archive"
+                )
+            ),
+            style = ListItemStyle.Primary,
+        )
     }
 }
 
@@ -195,5 +216,6 @@ internal fun RoomListModalBottomSheetContentPreview(
         onRoomSettingsClick = {},
         onLeaveRoomClick = {},
         onFavoriteChange = {},
+        onRoomArchiveClick = {}
     )
 }
