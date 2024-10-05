@@ -147,6 +147,7 @@ private fun RoomsView(
     } else {
         RoomsViewList(
             state = state,
+            filtersState = filtersState,
             eventSink = eventSink,
             onSetUpRecoveryClick = onSetUpRecoveryClick,
             onConfirmRecoveryKeyClick = onConfirmRecoveryKeyClick,
@@ -160,6 +161,7 @@ private fun RoomsView(
 @Composable
 private fun RoomsViewList(
     state: RoomListContentState.Rooms,
+    filtersState: RoomListFiltersState,
     eventSink: (RoomListEvents) -> Unit,
     onSetUpRecoveryClick: () -> Unit,
     onConfirmRecoveryKeyClick: () -> Unit,
@@ -167,6 +169,7 @@ private fun RoomsViewList(
     onMigrateToNativeSlidingSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    Timber.d("wxt, filterState: ${filtersState.filterSelectionStates.toString()}")
     val lazyListState = rememberLazyListState()
     val visibleRange by remember {
         derivedStateOf {
@@ -224,19 +227,32 @@ private fun RoomsViewList(
             items = state.summaries,
             contentType = { _, room -> room.contentType() },
         ) { index, room ->
-            RoomSummaryRow(
-                room = room,
-                onClick = onRoomClick,
-                eventSink = eventSink,
-            )
-            if (index != state.summaries.lastIndex) {
-                HorizontalDivider()
+            if (filtersState.filterSelectionStates.first().filter == RoomListFilter.Archived &&
+                filtersState.filterSelectionStates.first().isSelected
+                ){
+                if (room.isArchived){
+                    RoomSummaryRow(
+                        room = room,
+                        onClick = onRoomClick,
+                        eventSink = eventSink,
+                    )
+                }
+
+            }else {
+                if (!room.isArchived){
+                    RoomSummaryRow(
+                        room = room,
+                        onClick = onRoomClick,
+                        eventSink = eventSink,
+                    )
+                    if (index != state.summaries.lastIndex) {
+                        HorizontalDivider()
+                    }
+                }
+
             }
-            Timber.i("wxt, Room archive: ", index , room.isArchived)
-            Timber.i("wxt, Room archive: ${room.isArchived}")
-            if (room.isArchived ){
-                Text("AAAA")
-            }
+
+
         }
     }
 }

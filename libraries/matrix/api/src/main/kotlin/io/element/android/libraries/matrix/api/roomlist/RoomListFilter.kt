@@ -55,6 +55,8 @@ sealed interface RoomListFilter {
      */
     data object Invite : RoomListFilter
 
+    data object Archived: RoomListFilter
+
     /**
      * A filter that matches either Group or People rooms.
      */

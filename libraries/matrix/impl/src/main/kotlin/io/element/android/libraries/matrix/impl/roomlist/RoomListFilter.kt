@@ -34,6 +34,7 @@ val RoomListFilter.predicate
         RoomListFilter.Invite -> { roomSummary: RoomSummary ->
             roomSummary.isInvited()
         }
+        RoomListFilter.Archived -> {roomSummary: RoomSummary -> true}
     }
 
 fun List<RoomSummary>.filter(filter: RoomListFilter): List<RoomSummary> {

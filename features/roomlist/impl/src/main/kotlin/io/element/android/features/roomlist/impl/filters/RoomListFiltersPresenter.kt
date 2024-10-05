@@ -51,6 +51,7 @@ class RoomListFiltersPresenter @Inject constructor(
                             RoomListFilter.Unread -> MatrixRoomListFilter.Unread
                             RoomListFilter.Favourites -> MatrixRoomListFilter.Favorite
                             RoomListFilter.Invites -> MatrixRoomListFilter.Invite
+                            RoomListFilter.Archived -> MatrixRoomListFilter.Archived
                         }
                     }
                 }
