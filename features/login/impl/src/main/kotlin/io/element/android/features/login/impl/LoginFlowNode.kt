@@ -33,12 +33,14 @@ import io.element.android.features.login.impl.screens.confirmaccountprovider.Con
 import io.element.android.features.login.impl.screens.createaccount.CreateAccountNode
 import io.element.android.features.login.impl.screens.loginpassword.LoginPasswordNode
 import io.element.android.features.login.impl.screens.searchaccountprovider.SearchAccountProviderNode
+import io.element.android.features.login.impl.util.defaultAccountProvider
 import io.element.android.libraries.architecture.BackstackView
 import io.element.android.libraries.architecture.BaseFlowNode
 import io.element.android.libraries.architecture.NodeInputs
 import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.architecture.inputs
 import io.element.android.libraries.di.AppScope
+import io.element.android.libraries.matrix.api.auth.MatrixAuthenticationService
 import io.element.android.libraries.matrix.api.auth.OidcDetails
 import io.element.android.libraries.oidc.api.OidcAction
 import io.element.android.libraries.oidc.api.OidcActionFlow
@@ -55,6 +57,7 @@ class LoginFlowNode @AssistedInject constructor(
     private val defaultLoginUserStory: DefaultLoginUserStory,
     private val oidcActionFlow: OidcActionFlow,
     private val oidcEntryPoint: OidcEntryPoint,
+    private val authenticationService: MatrixAuthenticationService,
 ) : BaseFlowNode<LoginFlowNode.NavTarget>(
     backstack = BackStack(
         initialElement = NavTarget.Root,
@@ -123,7 +126,9 @@ class LoginFlowNode @AssistedInject constructor(
                 if (inputs.flowType == LoginFlowType.SIGN_IN_QR_CODE) {
                     createNode<QrCodeLoginFlowNode>(buildContext)
                 } else {
-                    resolve(NavTarget.ConfirmAccountProvider, buildContext)
+//                    resolve(NavTarget.ConfirmAccountProvider, buildContext)
+                    initializeLoginFlow()
+                    resolve(NavTarget.LoginPassword, buildContext)
                 }
             }
             NavTarget.ConfirmAccountProvider -> {
@@ -194,6 +199,17 @@ class LoginFlowNode @AssistedInject constructor(
                 )
                 createNode<CreateAccountNode>(buildContext, listOf(inputs))
             }
+        }
+    }
+
+    private fun initializeLoginFlow() {
+        // 使用默认的账户提供者
+        val defaultProvider = defaultAccountProvider
+        accountProviderDataSource.userSelection(defaultProvider)
+
+        // 设置默认的 homeserver
+        lifecycleScope.launch {
+            authenticationService.setHomeserver(defaultProvider.url)
         }
     }
 
