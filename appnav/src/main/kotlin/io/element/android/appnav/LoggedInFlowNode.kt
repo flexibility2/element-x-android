@@ -10,10 +10,13 @@ package io.element.android.appnav
 import android.content.Intent
 import android.os.Parcelable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -54,6 +57,7 @@ import io.element.android.libraries.architecture.BackstackView
 import io.element.android.libraries.architecture.BaseFlowNode
 import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.architecture.waitForNavTargetAttached
+import io.element.android.libraries.designsystem.components.BottomNavigationBar
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarDispatcher
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.SessionScope
@@ -490,6 +494,13 @@ class LoggedInFlowNode @AssistedInject constructor(
             if (ftueState is FtueState.Complete) {
                 PermanentChild(permanentNavModel = permanentNavModel, navTarget = NavTarget.LoggedInPermanent)
             }
+            BottomNavigationBar(
+                onHomeClick = { backstack.push(NavTarget.RoomList) },
+                onCreateRoomClick = { backstack.push(NavTarget.CreateRoom) },
+                onSettingsClick = { backstack.push(NavTarget.Settings()) },
+                modifier = Modifier.align(Alignment.BottomCenter).height(56.dp)
+            )
+
         }
     }
 

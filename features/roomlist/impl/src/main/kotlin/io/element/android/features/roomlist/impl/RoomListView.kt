@@ -149,21 +149,21 @@ private fun RoomListScaffold(
                     .consumeWindowInsets(padding)
             )
         },
-        floatingActionButton = {
-            if (state.displayActions) {
-                FloatingActionButton(
-                    // FIXME align on Design system theme
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    onClick = onCreateRoomClick
-                ) {
-                    Icon(
-                        // Note cannot use Icons.Outlined.EditSquare, it does not exist :/
-                        imageVector = CompoundIcons.Compose(),
-                        contentDescription = stringResource(id = R.string.screen_roomlist_a11y_create_message)
-                    )
-                }
-            }
-        },
+//        floatingActionButton = {
+//            if (state.displayActions) {
+//                FloatingActionButton(
+//                    // FIXME align on Design system theme
+//                    containerColor = MaterialTheme.colorScheme.primary,
+//                    onClick = onCreateRoomClick
+//                ) {
+//                    Icon(
+//                        // Note cannot use Icons.Outlined.EditSquare, it does not exist :/
+//                        imageVector = CompoundIcons.Compose(),
+//                        contentDescription = stringResource(id = R.string.screen_roomlist_a11y_create_message)
+//                    )
+//                }
+//            }
+//        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     )
 }
