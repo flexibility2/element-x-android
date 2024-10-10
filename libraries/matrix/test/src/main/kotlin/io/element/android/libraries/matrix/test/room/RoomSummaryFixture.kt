@@ -84,6 +84,8 @@ fun aRoomSummary(
     isFavorite = isFavorite,
     currentUserMembership = currentUserMembership,
     heroes = heroes,
+    isArchived = false
+
 )
 
 fun aRoomMessage(
