@@ -21,23 +21,25 @@ fun BottomNavigationBar(
     onHomeClick: () -> Unit,
     onCreateRoomClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    modifier: Modifier = Modifier // 添加 modifier 参数
+    modifier: Modifier = Modifier
 ) {
     BottomAppBar(
-        modifier = modifier, // 将 modifier 传递给 BottomAppBar
-        contentPadding = PaddingValues(top = 8.dp, bottom = 0.dp),
+        modifier = modifier,
+        contentPadding = PaddingValues(top = 4.dp, bottom = 0.dp),
         content = {
+            Spacer(modifier = Modifier.weight(0.5f))
             IconButton(onClick = onHomeClick) {
-                Icon(imageVector = CompoundIcons.Home(), contentDescription = "Home")
+                Icon(imageVector = CompoundIcons.Chat(), contentDescription = "Home")
             }
-            Spacer(modifier = Modifier.weight(1f, true))
+            Spacer(modifier = Modifier.weight(0.8f))
             IconButton(onClick = onCreateRoomClick) {
                 Icon(imageVector = CompoundIcons.UserAdd(), contentDescription = "Create Room")
             }
-            Spacer(modifier = Modifier.weight(1f, true))
+            Spacer(modifier = Modifier.weight(0.8f))
             IconButton(onClick = onSettingsClick) {
                 Icon(imageVector = CompoundIcons.Settings(), contentDescription = "Settings")
             }
+            Spacer(modifier = Modifier.weight(0.5f))
         }
     )
 }
