@@ -8,6 +8,7 @@
 package io.element.android.libraries.designsystem.atomic.pages
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.libraries.designsystem.R
 import io.element.android.libraries.designsystem.preview.ElementPreview
@@ -45,15 +47,9 @@ fun OnBoardingPage(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .background(Color.White) // 添加純白色背景
     ) {
-        // BG
-        Image(
-            modifier = Modifier
-                .fillMaxSize(),
-            painter = painterResource(id = R.drawable.onboarding_bg),
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
-        )
+        // 移除背景圖片
         Column(
             modifier = Modifier
                 .fillMaxSize()

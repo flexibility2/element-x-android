@@ -81,25 +81,25 @@ fun ElementLogoAtom(
                 .background(backgroundColor)
                 .blurCompat(blur)
         )
-        Image(
-            modifier = Modifier
-                .size(size.logoSize)
-                // Do the same double shadow than on Figma...
-                .shadow(
-                    elevation = 35.dp,
-                    clip = false,
-                    shape = CircleShape,
-                    ambientColor = logoShadowColor,
-                )
-                .shadow(
-                    elevation = 35.dp,
-                    clip = false,
-                    shape = CircleShape,
-                    ambientColor = Color(0x80000000),
-                ),
-            painter = painterResource(id = R.drawable.element_logo),
-            contentDescription = null
-        )
+//        Image(
+//            modifier = Modifier
+//                .size(size.logoSize)
+//                // Do the same double shadow than on Figma...
+//                .shadow(
+//                    elevation = 35.dp,
+//                    clip = false,
+//                    shape = CircleShape,
+//                    ambientColor = logoShadowColor,
+//                )
+//                .shadow(
+//                    elevation = 35.dp,
+//                    clip = false,
+//                    shape = CircleShape,
+//                    ambientColor = Color(0x80000000),
+//                ),
+//            painter = painterResource(id = R.drawable.element_logo),
+//            contentDescription = null
+//        )
     }
 }
 

@@ -113,14 +113,14 @@ private fun OnBoardingContent(
                 horizontalAlignment = CenterHorizontally,
             ) {
                 Text(
-                    text = stringResource(id = R.string.screen_onboarding_welcome_title),
+                    text = "Tom Chat",
                     color = ElementTheme.materialColors.primary,
                     style = ElementTheme.typography.fontHeadingLgBold,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = stringResource(id = R.string.screen_onboarding_welcome_message, state.productionApplicationName),
+                    text = "The World's Best Chatting App",
                     color = ElementTheme.materialColors.secondary,
                     style = ElementTheme.typography.fontBodyLgRegular.copy(fontSize = 17.sp),
                     textAlign = TextAlign.Center
