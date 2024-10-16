@@ -238,7 +238,7 @@ private fun ButtonInternal(
                 androidx.compose.material.Icon(
                     painter = leadingIcon.getPainter(),
                     contentDescription = null,
-                    tint = LocalContentColor.current,
+//                    tint = LocalContentColor.current,
                     modifier = Modifier.size(20.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -249,6 +249,7 @@ private fun ButtonInternal(
             style = textStyle,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+            color = Color.Black
         )
     }
 }
@@ -325,7 +326,8 @@ internal enum class ButtonStyle {
         return if (destructive) {
             ElementTheme.colors.bgCriticalPrimary
         } else {
-            ElementTheme.materialColors.primary
+//            ElementTheme.materialColors.primary
+            Color(0xFF23EA22)
         }
     }
 
