@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
@@ -40,8 +41,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.login.impl.R
@@ -111,6 +114,26 @@ fun LoginPasswordView(
         ) {
             // Remove the top Spacer
 
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalAlignment = CenterHorizontally,
+            ) {
+                Text(
+                    text = "Log in",
+                    color = ElementTheme.materialColors.primary,
+                    style = ElementTheme.typography.fontHeadingLgBold,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+//                Text(
+//                    text = "Enter your name and password",
+//                    color = ElementTheme.materialColors.secondary,
+//                    style = ElementTheme.typography.fontBodyLgRegular.copy(fontSize = 17.sp),
+//                    textAlign = TextAlign.Center
+//                )
+            }
+            Spacer(modifier = Modifier.height(14.dp))
             LoginForm(
                 state = state,
                 isLoading = isLoading,
@@ -123,7 +146,7 @@ fun LoginPasswordView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 0.dp)
             ) {
                 ButtonColumnMolecule {
                     Button(
@@ -136,7 +159,7 @@ fun LoginPasswordView(
                             .testTag(TestTags.loginContinue)
                     )
                     // 移除这个 Spacer
-                    // Spacer(modifier = Modifier.height(48.dp))
+                     Spacer(modifier = Modifier.height(48.dp))
                 }
             }
 
@@ -163,11 +186,11 @@ private fun LoginForm(
     val eventSink = state.eventSink
 
     Column {
-        Text(
-            text = stringResource(R.string.screen_login_form_header),
-            modifier = Modifier.padding(start = 16.dp),
-            style = ElementTheme.typography.fontBodyMdRegular,
-        )
+//        Text(
+//            text = stringResource(R.string.screen_login_form_header),
+//            modifier = Modifier.padding(start = 16.dp),
+//            style = ElementTheme.typography.fontBodyMdRegular,
+//        )
 
 //        Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
