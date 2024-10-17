@@ -7,6 +7,7 @@
 
 package io.element.android.features.login.impl.screens.loginpassword
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -105,31 +106,23 @@ fun LoginPasswordView(
                 .padding(padding)
                 .consumeWindowInsets(padding)
                 .verticalScroll(state = scrollState)
-                .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.Center // 添加这一行来垂直居中内容
         ) {
-            // Title
-            IconTitleSubtitleMolecule(
-                modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp),
-                iconImageVector = Icons.Filled.AccountCircle,
-                title = stringResource(
-                    id = R.string.screen_account_provider_signin_title,
-                    state.accountProvider.title
-                ),
-                subTitle = stringResource(id = R.string.screen_login_subtitle)
-            )
-            Spacer(Modifier.height(40.dp))
+            // Remove the top Spacer
+
             LoginForm(
                 state = state,
                 isLoading = isLoading,
                 onSubmit = ::submit
             )
-            // Min spacing
-            Spacer(Modifier.height(24.dp))
-            // Flexible spacing to keep the submit button at the bottom
-            Spacer(modifier = Modifier.weight(1f))
+
+            Spacer(modifier = Modifier.height(24.dp)) // 减小这个间距
+
             // Submit
             Box(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
                 ButtonColumnMolecule {
@@ -142,7 +135,8 @@ fun LoginPasswordView(
                             .fillMaxWidth()
                             .testTag(TestTags.loginContinue)
                     )
-                    Spacer(modifier = Modifier.height(48.dp))
+                    // 移除这个 Spacer
+                    // Spacer(modifier = Modifier.height(48.dp))
                 }
             }
 
@@ -175,7 +169,7 @@ private fun LoginForm(
             style = ElementTheme.typography.fontBodyMdRegular,
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+//        Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = loginFieldState,
             readOnly = isLoading,

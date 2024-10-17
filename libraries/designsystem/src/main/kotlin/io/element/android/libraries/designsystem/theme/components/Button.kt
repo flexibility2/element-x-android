@@ -238,7 +238,7 @@ private fun ButtonInternal(
                 androidx.compose.material.Icon(
                     painter = leadingIcon.getPainter(),
                     contentDescription = null,
-//                    tint = LocalContentColor.current,
+                    tint = LocalContentColor.current,
                     modifier = Modifier.size(20.dp),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -249,7 +249,7 @@ private fun ButtonInternal(
             style = textStyle,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = Color.Black
+            color = LocalContentColor.current
         )
     }
 }
@@ -295,29 +295,19 @@ internal enum class ButtonStyle {
     fun getColors(destructive: Boolean): ButtonColors = when (this) {
         Filled -> ButtonDefaults.buttonColors(
             containerColor = getPrimaryColor(destructive),
-            contentColor = ElementTheme.materialColors.onPrimary,
+            contentColor = Color.Black, // 启用状态下的黑色文字
             disabledContainerColor = if (destructive) {
                 ElementTheme.colors.bgCriticalPrimary.copy(alpha = 0.5f)
             } else {
-                ElementTheme.colors.bgActionPrimaryDisabled
+                Color(0xFFE0E0E0) // 禁用状态的灰色背景
             },
-            disabledContentColor = ElementTheme.colors.textOnSolidPrimary
+            disabledContentColor = Color.White // 禁用状态的白色文字
         )
-        Outlined -> ButtonDefaults.buttonColors(
+        Outlined, Text -> ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
-            contentColor = getPrimaryColor(destructive),
+            contentColor = Color.Black, // 启用状态下的黑色文字
             disabledContainerColor = Color.Transparent,
-            disabledContentColor = getDisabledContentColor(destructive),
-        )
-        Text -> ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            contentColor = if (destructive) {
-                ElementTheme.colors.textCriticalPrimary
-            } else {
-                if (LocalContentColor.current.isSpecified) LocalContentColor.current else ElementTheme.materialColors.primary
-            },
-            disabledContainerColor = Color.Transparent,
-            disabledContentColor = getDisabledContentColor(destructive),
+            disabledContentColor = Color.White // 禁用状态的白色文字
         )
     }
 
@@ -326,7 +316,6 @@ internal enum class ButtonStyle {
         return if (destructive) {
             ElementTheme.colors.bgCriticalPrimary
         } else {
-//            ElementTheme.materialColors.primary
             Color(0xFF23EA22)
         }
     }
