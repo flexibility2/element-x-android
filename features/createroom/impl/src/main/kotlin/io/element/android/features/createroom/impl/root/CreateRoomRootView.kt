@@ -121,16 +121,16 @@ private fun CreateRoomRootViewTopBar(
     TopAppBar(
         title = {
             Text(
-                text = stringResource(id = CommonStrings.action_start_chat),
+                text = "Contacts",
                 style = ElementTheme.typography.aliasScreenTitle,
             )
         },
-        navigationIcon = {
-            BackButton(
-                imageVector = CompoundIcons.Close(),
-                onClick = onCloseClick,
-            )
-        }
+//        navigationIcon = {
+//            BackButton(
+//                imageVector = CompoundIcons.Close(),
+//                onClick = onCloseClick,
+//            )
+//        }
     )
 }
 

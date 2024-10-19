@@ -22,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import io.element.android.compound.theme.ElementTheme
 import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.libraries.designsystem.components.button.BackButton
@@ -73,9 +74,9 @@ private fun PreferenceTopAppBar(
     onBackClick: () -> Unit,
 ) {
     TopAppBar(
-        navigationIcon = {
-            BackButton(onClick = onBackClick)
-        },
+//        navigationIcon = {
+//            BackButton(onClick = onBackClick)
+//        },
         title = {
             Text(
                 text = title,
