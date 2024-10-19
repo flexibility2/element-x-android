@@ -18,12 +18,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -35,6 +37,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -209,7 +212,7 @@ private fun LoginForm(
                     }
                 ),
             placeholder = {
-                Text(text = stringResource(CommonStrings.common_username))
+                Text(text = stringResource(CommonStrings.common_username), color = Color(0xFFC4C4C4))
             },
             onValueChange = {
                 val sanitized = it.sanitize()
@@ -235,6 +238,13 @@ private fun LoginForm(
             } else {
                 null
             },
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = Color(0xFFF2F2F2),
+                focusedContainerColor = Color(0xFFF2F2F2),
+                unfocusedBorderColor = Color(0xFFF2F2F2),
+                focusedBorderColor = Color(0xFFF2F2F2)
+            ),
+            shape = RoundedCornerShape(30)
         )
         var passwordVisible by remember { mutableStateOf(false) }
         if (state.loginAction is AsyncData.Loading) {
@@ -263,7 +273,7 @@ private fun LoginForm(
                 eventSink(LoginPasswordEvents.SetPassword(sanitized))
             },
             placeholder = {
-                Text(text = stringResource(CommonStrings.common_password))
+                Text(text = stringResource(CommonStrings.common_password), color = Color(0xFFC4C4C4))
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
@@ -284,6 +294,13 @@ private fun LoginForm(
                 onDone = { onSubmit() }
             ),
             singleLine = true,
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedContainerColor = Color(0xFFF2F2F2),
+                focusedContainerColor = Color(0xFFF2F2F2),
+                unfocusedBorderColor = Color(0xFFF2F2F2),
+                focusedBorderColor = Color(0xFFF2F2F2)
+            ),
+            shape = RoundedCornerShape(30)
         )
     }
 }
