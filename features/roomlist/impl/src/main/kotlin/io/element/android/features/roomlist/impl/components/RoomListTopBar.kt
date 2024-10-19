@@ -263,10 +263,10 @@ private fun DefaultRoomListTopBar(
                     windowInsets = WindowInsets(0.dp),
                 )
                 if (displayFilters) {
-                    RoomListFiltersView(
-                        state = filtersState,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+//                    RoomListFiltersView(
+//                        state = filtersState,
+//                        modifier = Modifier.padding(bottom = 16.dp)
+//                    )
                 }
             }
         }

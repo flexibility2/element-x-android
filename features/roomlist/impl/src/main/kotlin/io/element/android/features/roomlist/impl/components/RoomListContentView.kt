@@ -196,10 +196,10 @@ private fun RoomsViewList(
             }
             SecurityBannerState.RecoveryKeyConfirmation -> {
                 item {
-                    ConfirmRecoveryKeyBanner(
-                        onContinueClick = onConfirmRecoveryKeyClick,
-                        onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) }
-                    )
+//                    ConfirmRecoveryKeyBanner(
+//                        onContinueClick = onConfirmRecoveryKeyClick,
+//                        onDismissClick = { updatedEventSink(RoomListEvents.DismissBanner) }
+//                    )
                 }
             }
             SecurityBannerState.NeedsNativeSlidingSyncMigration -> {
