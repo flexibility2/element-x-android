@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,6 +29,7 @@ import com.bumble.appyx.core.node.Node
 import com.bumble.appyx.core.plugin.Plugin
 import com.bumble.appyx.core.plugin.plugins
 import com.bumble.appyx.navmodel.backstack.BackStack
+import com.bumble.appyx.navmodel.backstack.activeElement
 import com.bumble.appyx.navmodel.backstack.operation.push
 import com.bumble.appyx.navmodel.backstack.operation.replace
 import dagger.assisted.Assisted
@@ -486,6 +488,7 @@ class LoggedInFlowNode @AssistedInject constructor(
         }
     }
 
+    private val selectedItemState = mutableStateOf(0)
     @Composable
     override fun View(modifier: Modifier) {
         Box(modifier = modifier) {
@@ -494,11 +497,13 @@ class LoggedInFlowNode @AssistedInject constructor(
             if (ftueState is FtueState.Complete) {
                 PermanentChild(permanentNavModel = permanentNavModel, navTarget = NavTarget.LoggedInPermanent)
             }
+            val selectedItem by selectedItemState
             BottomNavigationBar(
-                onHomeClick = { backstack.push(NavTarget.RoomList) },
-                onCreateRoomClick = { backstack.push(NavTarget.CreateRoom) },
-                onSettingsClick = { backstack.push(NavTarget.Settings()) },
-                modifier = Modifier.align(Alignment.BottomCenter).height(56.dp)
+                onHomeClick = { backstack.push(NavTarget.RoomList); selectedItemState.value = 0},
+                onCreateRoomClick = { backstack.push(NavTarget.CreateRoom); selectedItemState.value = 1 },
+                onSettingsClick = { backstack.push(NavTarget.Settings()); selectedItemState.value = 2 },
+                modifier = Modifier.align(Alignment.BottomCenter).height(72.dp),
+                selectedItem = selectedItem
             )
 
         }
