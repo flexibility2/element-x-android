@@ -12,6 +12,7 @@ import android.os.Parcelable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -239,6 +240,8 @@ class LoggedInFlowNode @AssistedInject constructor(
         @Parcelize
         data object LogoutForNativeSlidingSyncMigrationNeeded : NavTarget
     }
+
+    private val showBottomBarState = mutableStateOf(true)
 
     override fun resolve(navTarget: NavTarget, buildContext: BuildContext): Node {
         return when (navTarget) {
@@ -497,14 +500,24 @@ class LoggedInFlowNode @AssistedInject constructor(
             if (ftueState is FtueState.Complete) {
                 PermanentChild(permanentNavModel = permanentNavModel, navTarget = NavTarget.LoggedInPermanent)
             }
+            LaunchedEffect(backstack) {
+                backstack.elements.collect { elements ->
+                    val currentNavTarget = elements.lastOrNull()?.key?.navTarget
+                    showBottomBarState.value = currentNavTarget !is NavTarget.Room
+                }
+            }
             val selectedItem by selectedItemState
-            BottomNavigationBar(
-                onHomeClick = { backstack.push(NavTarget.RoomList); selectedItemState.value = 0},
-                onCreateRoomClick = { backstack.push(NavTarget.CreateRoom); selectedItemState.value = 1 },
-                onSettingsClick = { backstack.push(NavTarget.Settings()); selectedItemState.value = 2 },
-                modifier = Modifier.align(Alignment.BottomCenter).height(72.dp),
-                selectedItem = selectedItem
-            )
+            val showBottomBar by showBottomBarState;
+            if(showBottomBar){
+                BottomNavigationBar(
+                    onHomeClick = { backstack.push(NavTarget.RoomList); selectedItemState.value = 0},
+                    onCreateRoomClick = { backstack.push(NavTarget.CreateRoom); selectedItemState.value = 1 },
+                    onSettingsClick = { backstack.push(NavTarget.Settings()); selectedItemState.value = 2 },
+                    modifier = Modifier.align(Alignment.BottomCenter).height(72.dp),
+                    selectedItem = selectedItem
+                )
+            }
+
 
         }
     }
