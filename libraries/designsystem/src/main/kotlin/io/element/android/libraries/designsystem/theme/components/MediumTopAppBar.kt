@@ -35,7 +35,7 @@ fun MediumTopAppBar(
     colors: TopAppBarColors = TopAppBarDefaults.mediumTopAppBarColors(),
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    androidx.compose.material3.MediumTopAppBar(
+    androidx.compose.material3.CenterAlignedTopAppBar(
         title = title,
         modifier = modifier,
         navigationIcon = navigationIcon,

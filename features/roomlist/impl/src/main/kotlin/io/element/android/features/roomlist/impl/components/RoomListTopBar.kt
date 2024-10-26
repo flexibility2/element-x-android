@@ -56,6 +56,7 @@ import io.element.android.libraries.designsystem.text.roundToPx
 import io.element.android.libraries.designsystem.text.toDp
 import io.element.android.libraries.designsystem.text.toSp
 import io.element.android.libraries.designsystem.theme.aliasScreenTitle
+import io.element.android.libraries.designsystem.theme.components.CustomRoomListTopBar
 import io.element.android.libraries.designsystem.theme.components.DropdownMenu
 import io.element.android.libraries.designsystem.theme.components.DropdownMenuItem
 import io.element.android.libraries.designsystem.theme.components.HorizontalDivider
@@ -184,84 +185,163 @@ private fun DefaultRoomListTopBar(
                     )
                     .statusBarsPadding(),
             ) {
+//                CustomRoomListTopBar(
+//                    title = {
+//                        Text(text = stringResource(id = R.string.screen_roomlist_main_space_title))
+//                    },
+////                    navigationIcon = {
+////                        NavigationIcon(
+////                            avatarData = avatarData,
+////                            showAvatarIndicator = showAvatarIndicator,
+////                            onClick = onOpenSettings,
+////                        )
+////                    },
+////                    actions = {
+////                            IconButton(
+////                                onClick = onSearchClick,
+////                            ) {
+////                                Icon(
+////                                    imageVector = CompoundIcons.Search(),
+////                                    contentDescription = stringResource(CommonStrings.action_search),
+////                                )
+////                            }
+////                    },
+//                    onSearchClick = onSearchClick,
+//                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+//                        containerColor = Color.Transparent,
+//                        scrolledContainerColor = Color.Transparent,
+//                    ),
+//                    scrollBehavior = scrollBehavior,
+//                    windowInsets = WindowInsets(0.dp),
+//                )
+//                MediumTopAppBar(
+//                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+//                        containerColor = Color.Transparent,
+//                        scrolledContainerColor = Color.Transparent,
+//                    ),
+//                    title = {
+//                        Text(text = stringResource(id = R.string.screen_roomlist_main_space_title))
+//                    },
+//                    navigationIcon = {
+//                        NavigationIcon(
+//                            avatarData = avatarData,
+//                            showAvatarIndicator = showAvatarIndicator,
+//                            onClick = onOpenSettings,
+//                        )
+//                    },
+//                    actions = {
+//                        if (displayMenuItems) {
+//                            IconButton(
+//                                onClick = onSearchClick,
+//                            ) {
+//                                Icon(
+//                                    imageVector = CompoundIcons.Search(),
+//                                    contentDescription = stringResource(CommonStrings.action_search),
+//                                )
+//                            }
+//                            if (RoomListConfig.HAS_DROP_DOWN_MENU) {
+//                                var showMenu by remember { mutableStateOf(false) }
+//                                IconButton(
+//                                    onClick = { showMenu = !showMenu }
+//                                ) {
+//                                    Icon(
+//                                        imageVector = CompoundIcons.OverflowVertical(),
+//                                        contentDescription = null,
+//                                    )
+//                                }
+//                                DropdownMenu(
+//                                    expanded = showMenu,
+//                                    onDismissRequest = { showMenu = false }
+//                                ) {
+//                                    if (RoomListConfig.SHOW_INVITE_MENU_ITEM) {
+//                                        DropdownMenuItem(
+//                                            onClick = {
+//                                                showMenu = false
+//                                                onMenuActionClick(RoomListMenuAction.InviteFriends)
+//                                            },
+//                                            text = { Text(stringResource(id = CommonStrings.action_invite)) },
+//                                            leadingIcon = {
+//                                                Icon(
+//                                                    imageVector = CompoundIcons.ShareAndroid(),
+//                                                    tint = ElementTheme.materialColors.secondary,
+//                                                    contentDescription = null,
+//                                                )
+//                                            }
+//                                        )
+//                                    }
+//                                    if (RoomListConfig.SHOW_REPORT_PROBLEM_MENU_ITEM) {
+//                                        DropdownMenuItem(
+//                                            onClick = {
+//                                                showMenu = false
+//                                                onMenuActionClick(RoomListMenuAction.ReportBug)
+//                                            },
+//                                            text = { Text(stringResource(id = CommonStrings.common_report_a_problem)) },
+//                                            leadingIcon = {
+//                                                Icon(
+//                                                    imageVector = CompoundIcons.ChatProblem(),
+//                                                    tint = ElementTheme.materialColors.secondary,
+//                                                    contentDescription = null,
+//                                                )
+//                                            }
+//                                        )
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    },
+//                    scrollBehavior = scrollBehavior,
+//                    windowInsets = WindowInsets(0.dp),
+//                )
                 MediumTopAppBar(
+                                        title = {
+                        Text(text = stringResource(id = R.string.screen_roomlist_main_space_title))
+                    },
+                    navigationIcon = {
+                                                    IconButton(
+                                onClick = {},
+                            ) {
+                                Icon(
+                                    imageVector = CompoundIcons.Menu(),
+                                    contentDescription = "",
+                                )
+                            }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {},
+                        ) {
+                            Icon(
+                                imageVector = CompoundIcons.TakePhoto(),
+                                contentDescription = "",
+                            )
+                        }
+                    },
                     colors = TopAppBarDefaults.mediumTopAppBarColors(
                         containerColor = Color.Transparent,
                         scrolledContainerColor = Color.Transparent,
                     ),
-                    title = {
-                        Text(text = stringResource(id = R.string.screen_roomlist_main_space_title))
-                    },
-                    navigationIcon = {
-                        NavigationIcon(
-                            avatarData = avatarData,
-                            showAvatarIndicator = showAvatarIndicator,
-                            onClick = onOpenSettings,
-                        )
-                    },
-                    actions = {
-                        if (displayMenuItems) {
-                            IconButton(
-                                onClick = onSearchClick,
-                            ) {
-                                Icon(
-                                    imageVector = CompoundIcons.Search(),
-                                    contentDescription = stringResource(CommonStrings.action_search),
-                                )
-                            }
-                            if (RoomListConfig.HAS_DROP_DOWN_MENU) {
-                                var showMenu by remember { mutableStateOf(false) }
-                                IconButton(
-                                    onClick = { showMenu = !showMenu }
-                                ) {
-                                    Icon(
-                                        imageVector = CompoundIcons.OverflowVertical(),
-                                        contentDescription = null,
-                                    )
-                                }
-                                DropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false }
-                                ) {
-                                    if (RoomListConfig.SHOW_INVITE_MENU_ITEM) {
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                showMenu = false
-                                                onMenuActionClick(RoomListMenuAction.InviteFriends)
-                                            },
-                                            text = { Text(stringResource(id = CommonStrings.action_invite)) },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = CompoundIcons.ShareAndroid(),
-                                                    tint = ElementTheme.materialColors.secondary,
-                                                    contentDescription = null,
-                                                )
-                                            }
-                                        )
-                                    }
-                                    if (RoomListConfig.SHOW_REPORT_PROBLEM_MENU_ITEM) {
-                                        DropdownMenuItem(
-                                            onClick = {
-                                                showMenu = false
-                                                onMenuActionClick(RoomListMenuAction.ReportBug)
-                                            },
-                                            text = { Text(stringResource(id = CommonStrings.common_report_a_problem)) },
-                                            leadingIcon = {
-                                                Icon(
-                                                    imageVector = CompoundIcons.ChatProblem(),
-                                                    tint = ElementTheme.materialColors.secondary,
-                                                    contentDescription = null,
-                                                )
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    },
                     scrollBehavior = scrollBehavior,
                     windowInsets = WindowInsets(0.dp),
                 )
+                CustomRoomListTopBar(
+                    onSearchClick = onSearchClick,
+//                    navigationIcon = {
+//                        NavigationIcon(
+//                            avatarData = avatarData,
+//                            showAvatarIndicator = showAvatarIndicator,
+//                            onClick = onOpenSettings,
+//                        )
+//                    },
+//                    actions = {
+//                        if (displayMenuItems) {
+//                            // 添加原有的操作按钮
+//                        }
+//                    },
+                    scrollBehavior = scrollBehavior,
+                    windowInsets = WindowInsets(0.dp),
+                )
+
+
                 if (displayFilters) {
 //                    RoomListFiltersView(
 //                        state = filtersState,
