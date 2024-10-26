@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
@@ -47,9 +48,11 @@ fun Avatar(
     // If not null, will be used instead of the size from avatarData
     forcedAvatarSize: Dp? = null,
 ) {
+    val avatarSize = forcedAvatarSize ?: avatarData.size.dp
+    val cornerRadius = avatarSize / 8 // 可以根据需要调整圆角大小
     val commonModifier = modifier
-        .size(forcedAvatarSize ?: avatarData.size.dp)
-        .clip(CircleShape)
+        .size(avatarSize)
+        .clip(RoundedCornerShape(cornerRadius))
     if (avatarData.url.isNullOrBlank()) {
         InitialsAvatar(
             avatarData = avatarData,
@@ -116,8 +119,11 @@ private fun InitialsAvatar(
     modifier: Modifier = Modifier,
 ) {
     val avatarColors = AvatarColorsProvider.provide(avatarData.id)
+    val avatarSize = forcedAvatarSize ?: avatarData.size.dp
+    val cornerRadius = avatarSize / 8 // 保持一致的圆角大小
     Box(
-        modifier.background(color = avatarColors.background)
+        modifier
+            .background(color = avatarColors.background, shape = RoundedCornerShape(cornerRadius))
     ) {
         val fontSize = (forcedAvatarSize ?: avatarData.size.dp).toSp() / 2
         val originalFont = ElementTheme.typography.fontHeadingMdBold
