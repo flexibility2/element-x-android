@@ -9,12 +9,16 @@ package io.element.android.libraries.designsystem.theme.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarColors
@@ -24,6 +28,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -53,7 +58,7 @@ fun <T> SearchBar(
     enabled: Boolean = true,
     showBackButton: Boolean = true,
     resultState: SearchBarResultState<T> = SearchBarResultState.Initial(),
-    shape: Shape = SearchBarDefaults.inputFieldShape,
+    shape: Shape = RoundedCornerShape(8.dp),
     tonalElevation: Dp = SearchBarDefaults.TonalElevation,
     windowInsets: WindowInsets = SearchBarDefaults.windowInsets,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -82,7 +87,21 @@ fun <T> SearchBar(
                 onExpandedChange = onActiveChange,
                 enabled = enabled,
                 placeholder = {
-                    Text(text = placeHolderTitle)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.weight(0.2f))
+                        Icon(
+                            imageVector = CompoundIcons.Search(),
+                            contentDescription = stringResource(CommonStrings.action_search),
+                            tint = ElementTheme.materialColors.tertiary,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = placeHolderTitle)
+                        Spacer(modifier = Modifier.weight(0.1f))
+                    }
                 },
                 leadingIcon = if (showBackButton && active) {
                     { BackButton(onClick = { onActiveChange(false) }) }
@@ -103,11 +122,11 @@ fun <T> SearchBar(
 
                     !active -> {
                         {
-                            Icon(
-                                imageVector = CompoundIcons.Search(),
-                                contentDescription = stringResource(CommonStrings.action_search),
-                                tint = ElementTheme.materialColors.tertiary,
-                            )
+//                            Icon(
+//                                imageVector = CompoundIcons.Search(),
+//                                contentDescription = stringResource(CommonStrings.action_search),
+//                                tint = ElementTheme.materialColors.tertiary,
+//                            )
                         }
                     }
 
@@ -156,7 +175,7 @@ object ElementSearchBarDefaults {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun inactiveColors() = SearchBarDefaults.colors(
-        containerColor = ElementTheme.materialColors.surfaceVariant,
+        containerColor = Color.White,
         dividerColor = ElementTheme.materialColors.outline,
     )
 
@@ -166,14 +185,14 @@ object ElementSearchBarDefaults {
         focusedPlaceholderColor = ElementTheme.colors.textDisabled,
         unfocusedLeadingIconColor = ElementTheme.materialColors.primary,
         focusedLeadingIconColor = ElementTheme.materialColors.primary,
-        unfocusedTrailingIconColor = ElementTheme.materialColors.primary,
-        focusedTrailingIconColor = ElementTheme.materialColors.primary,
+        unfocusedContainerColor = Color.White,
+        focusedContainerColor = Color.White,
     )
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun activeColors() = SearchBarDefaults.colors(
-        containerColor = Color.Transparent,
+        containerColor = Color.White,
         dividerColor = ElementTheme.materialColors.outline,
     )
 
@@ -183,8 +202,8 @@ object ElementSearchBarDefaults {
         focusedPlaceholderColor = ElementTheme.colors.textDisabled,
         unfocusedLeadingIconColor = ElementTheme.materialColors.primary,
         focusedLeadingIconColor = ElementTheme.materialColors.primary,
-        unfocusedTrailingIconColor = ElementTheme.materialColors.primary,
-        focusedTrailingIconColor = ElementTheme.materialColors.primary,
+        unfocusedContainerColor = Color.White,
+        focusedContainerColor = Color.White,
     )
 }
 

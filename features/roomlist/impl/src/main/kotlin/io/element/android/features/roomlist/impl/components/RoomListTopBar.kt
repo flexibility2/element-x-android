@@ -293,18 +293,18 @@ private fun DefaultRoomListTopBar(
 //                    windowInsets = WindowInsets(0.dp),
 //                )
                 MediumTopAppBar(
-                                        title = {
+                    title = {
                         Text(text = stringResource(id = R.string.screen_roomlist_main_space_title))
                     },
                     navigationIcon = {
-                                                    IconButton(
-                                onClick = {},
-                            ) {
-                                Icon(
-                                    imageVector = CompoundIcons.Menu(),
-                                    contentDescription = "",
-                                )
-                            }
+                        IconButton(
+                            onClick = {},
+                        ) {
+                            Icon(
+                                imageVector = CompoundIcons.Menu(),
+                                contentDescription = "",
+                            )
+                        }
                     },
                     actions = {
                         IconButton(
