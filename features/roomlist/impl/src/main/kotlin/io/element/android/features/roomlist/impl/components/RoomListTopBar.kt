@@ -7,6 +7,7 @@
 
 package io.element.android.features.roomlist.impl.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -323,8 +324,11 @@ private fun DefaultRoomListTopBar(
                     scrollBehavior = scrollBehavior,
                     windowInsets = WindowInsets(0.dp),
                 )
-                CustomRoomListTopBar(
-                    onSearchClick = onSearchClick,
+                Box(
+                    modifier = Modifier.background(Color.Transparent)  // 確保背景透明
+                ) {
+                    CustomRoomListTopBar(
+                        onSearchClick = onSearchClick,
 //                    navigationIcon = {
 //                        NavigationIcon(
 //                            avatarData = avatarData,
@@ -337,10 +341,11 @@ private fun DefaultRoomListTopBar(
 //                            // 添加原有的操作按钮
 //                        }
 //                    },
-                    scrollBehavior = scrollBehavior,
-                    windowInsets = WindowInsets(0.dp),
-                )
+                        scrollBehavior = scrollBehavior,
+                        windowInsets = WindowInsets(0.dp),
 
+                    )
+                }
 
                 if (displayFilters) {
 //                    RoomListFiltersView(

@@ -124,13 +124,13 @@ fun CustomRoomListTopBar(
                 Modifier
             }
         ),
-        color = colors.containerColor,
+        color = Color.Transparent,
         tonalElevation = 0.dp
     ) {
         Column(modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(windowInsets)
-
+            .padding(horizontal = 16.dp)
         ) {
 
 
@@ -138,7 +138,7 @@ fun CustomRoomListTopBar(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(vertical = 8.dp),
 //                contentAlignment = Alignment.Center // 使搜索框水平居中
             ) {
                 Surface(

@@ -54,6 +54,10 @@ import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.ui.components.MatrixUserRow
 import io.element.android.libraries.ui.strings.CommonStrings
 import kotlinx.collections.immutable.persistentListOf
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun CreateRoomRootView(
@@ -64,8 +68,10 @@ fun CreateRoomRootView(
     onInviteFriendsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val backgroundColor = Color(0xFFF8F8F8)
     Scaffold(
         modifier = modifier.fillMaxWidth(),
+        containerColor = backgroundColor,
         topBar = {
             if (!state.userListState.isSearchActive) {
                 CreateRoomRootViewTopBar(onCloseClick = onCloseClick)
@@ -175,36 +181,53 @@ private fun CreateRoomActionButtonsList(
 ) {
     LazyColumn {
         item {
-            CreateRoomActionButton(
-                iconRes = CompoundDrawables.ic_compound_plus,
-                text = stringResource(id = R.string.screen_create_room_action_create_room),
-                onClick = onNewRoomClick,
-            )
-        }
-        item {
-            CreateRoomActionButton(
-                iconRes = CompoundDrawables.ic_compound_share_android,
-                text = stringResource(id = CommonStrings.action_invite_friends_to_app, state.applicationName),
-                onClick = onInvitePeopleClick,
-            )
-        }
-        if (state.userListState.recentDirectRooms.isNotEmpty()) {
-            item {
-                ListSectionHeader(
-                    title = stringResource(id = CommonStrings.common_suggestions),
-                    hasDivider = false,
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CreateRoomActionButton(
+                    modifier = Modifier.weight(1f),
+                    iconRes = CompoundDrawables.ic_compound_plus,
+                    text = stringResource(id = R.string.screen_create_room_action_create_room),
+                    onClick = onNewRoomClick,
+                )
+
+                CreateRoomActionButton(
+                    modifier = Modifier.weight(1f),
+                    iconRes = CompoundDrawables.ic_compound_share_android,
+                    text = "Invite Friends",
+                    onClick = onInvitePeopleClick,
                 )
             }
+        }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))  // 可以調整這個值來改變間距大小
+        }
+        if (state.userListState.recentDirectRooms.isNotEmpty()) {
+//            item {
+//                ListSectionHeader(
+//                    title = stringResource(id = CommonStrings.common_suggestions),
+//                    hasDivider = false,
+//                )
+//            }
             state.userListState.recentDirectRooms.forEach { recentDirectRoom ->
                 item {
-                    MatrixUserRow(
-                        modifier = Modifier.clickable(
-                            onClick = {
-                                onDmClick(recentDirectRoom.roomId)
-                            }
-                        ),
-                        matrixUser = recentDirectRoom.matrixUser,
-                    )
+                    androidx.compose.material3.Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.surface, // 白色背景
+                        shape = RoundedCornerShape(0.dp)
+                    ) {
+                        MatrixUserRow(
+                            modifier = Modifier.clickable(
+                                onClick = {
+                                    onDmClick(recentDirectRoom.roomId)
+                                }
+                            ),
+                            matrixUser = recentDirectRoom.matrixUser,
+                        )
+                    }
                 }
             }
         }
@@ -216,25 +239,30 @@ private fun CreateRoomActionButton(
     @DrawableRes iconRes: Int,
     text: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val greenColor = Color(0xFF23EA22)
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
+        modifier = modifier
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(12.dp)
+            )
             .clickable { onClick() }
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.secondary,
+            tint = greenColor,
             resourceId = iconRes,
             contentDescription = null,
         )
         Text(
             text = text,
             style = ElementTheme.typography.fontBodyLgRegular,
+            color = greenColor
         )
     }
 }

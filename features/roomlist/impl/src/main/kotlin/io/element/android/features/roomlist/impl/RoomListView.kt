@@ -38,6 +38,8 @@ import io.element.android.libraries.designsystem.theme.components.Scaffold
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarHost
 import io.element.android.libraries.designsystem.utils.snackbar.rememberSnackbarHostState
 import io.element.android.libraries.matrix.api.core.RoomId
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun RoomListView(
@@ -113,7 +115,7 @@ private fun RoomListScaffold(
     fun onRoomClick(room: RoomListRoomSummary) {
         onRoomClick(room.roomId)
     }
-
+    val backgroundColor = Color(0xFFF8F8F8)
     val appBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(appBarState)
     val snackbarHostState = rememberSnackbarHostState(snackbarMessage = state.snackbarMessage)
@@ -121,18 +123,22 @@ private fun RoomListScaffold(
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            RoomListTopBar(
-                matrixUser = state.matrixUser,
-                showAvatarIndicator = state.showAvatarIndicator,
-                areSearchResultsDisplayed = state.searchState.isSearchActive,
-                onToggleSearch = { state.eventSink(RoomListEvents.ToggleSearchResults) },
-                onMenuActionClick = onMenuActionClick,
-                onOpenSettings = onOpenSettings,
-                scrollBehavior = scrollBehavior,
-                displayMenuItems = state.displayActions,
-                displayFilters = state.displayFilters,
-                filtersState = state.filtersState,
-            )
+            Box(
+                modifier = Modifier.background(backgroundColor).padding(bottom = 8.dp)
+            ) {
+                RoomListTopBar(
+                    matrixUser = state.matrixUser,
+                    showAvatarIndicator = state.showAvatarIndicator,
+                    areSearchResultsDisplayed = state.searchState.isSearchActive,
+                    onToggleSearch = { state.eventSink(RoomListEvents.ToggleSearchResults) },
+                    onMenuActionClick = onMenuActionClick,
+                    onOpenSettings = onOpenSettings,
+                    scrollBehavior = scrollBehavior,
+                    displayMenuItems = state.displayActions,
+                    displayFilters = state.displayFilters,
+                    filtersState = state.filtersState,
+                )
+            }
         },
         content = { padding ->
             RoomListContentView(
