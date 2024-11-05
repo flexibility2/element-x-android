@@ -14,9 +14,9 @@ android {
 
     defaultConfig {
         applicationId = "io.element.android.samples.minimal"
-        targetSdk = Versions.targetSdk
-        versionCode = Versions.versionCode
-        versionName = Versions.versionName
+        targetSdk = Versions.TARGET_SDK
+        versionCode = Versions.VERSION_CODE
+        versionName = Versions.VERSION_NAME
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -43,6 +43,7 @@ dependencies {
     implementation(projects.libraries.permissions.noop)
     implementation(projects.libraries.sessionStorage.implMemory)
     implementation(projects.libraries.designsystem)
+    implementation(projects.libraries.androidutils)
     implementation(projects.libraries.architecture)
     implementation(projects.libraries.core)
     implementation(projects.libraries.network)

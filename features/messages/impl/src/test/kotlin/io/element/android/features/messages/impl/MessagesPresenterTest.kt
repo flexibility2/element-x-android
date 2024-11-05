@@ -47,8 +47,6 @@ import io.element.android.libraries.designsystem.components.avatar.AvatarSize
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarDispatcher
 import io.element.android.libraries.featureflag.test.FakeFeatureFlagService
 import io.element.android.libraries.matrix.api.core.EventId
-import io.element.android.libraries.matrix.api.core.TransactionId
-import io.element.android.libraries.matrix.api.core.UniqueId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.media.MediaSource
 import io.element.android.libraries.matrix.api.permalink.PermalinkParser
@@ -56,13 +54,14 @@ import io.element.android.libraries.matrix.api.room.MatrixRoom
 import io.element.android.libraries.matrix.api.room.MatrixRoomMembersState
 import io.element.android.libraries.matrix.api.room.MessageEventType
 import io.element.android.libraries.matrix.api.room.RoomMembershipState
+import io.element.android.libraries.matrix.api.timeline.item.event.EventOrTransactionId
+import io.element.android.libraries.matrix.api.timeline.item.event.toEventOrTransactionId
 import io.element.android.libraries.matrix.test.AN_AVATAR_URL
 import io.element.android.libraries.matrix.test.AN_EVENT_ID
 import io.element.android.libraries.matrix.test.A_ROOM_ID
 import io.element.android.libraries.matrix.test.A_SESSION_ID
 import io.element.android.libraries.matrix.test.A_SESSION_ID_2
 import io.element.android.libraries.matrix.test.A_THROWABLE
-import io.element.android.libraries.matrix.test.A_UNIQUE_ID
 import io.element.android.libraries.matrix.test.core.aBuildMeta
 import io.element.android.libraries.matrix.test.permalink.FakePermalinkParser
 import io.element.android.libraries.matrix.test.room.FakeMatrixRoom
@@ -70,9 +69,9 @@ import io.element.android.libraries.matrix.test.room.aRoomInfo
 import io.element.android.libraries.matrix.test.room.aRoomMember
 import io.element.android.libraries.matrix.test.timeline.FakeTimeline
 import io.element.android.libraries.matrix.ui.messages.reply.InReplyToDetails
-import io.element.android.libraries.textcomposer.model.MarkdownTextEditorState
 import io.element.android.libraries.textcomposer.model.MessageComposerMode
 import io.element.android.libraries.textcomposer.model.TextEditorState
+import io.element.android.libraries.textcomposer.model.aTextEditorStateMarkdown
 import io.element.android.services.analytics.test.FakeAnalyticsService
 import io.element.android.tests.testutils.EventsRecorder
 import io.element.android.tests.testutils.WarmUpRule
@@ -164,8 +163,9 @@ class MessagesPresenterTest {
     @Test
     fun `present - handle toggling a reaction`() = runTest {
         val coroutineDispatchers = testCoroutineDispatchers(useUnconfinedTestDispatcher = true)
-        val toggleReactionSuccess = lambdaRecorder { _: String, _: UniqueId -> Result.success(Unit) }
-        val toggleReactionFailure = lambdaRecorder { _: String, _: UniqueId -> Result.failure<Unit>(IllegalStateException("Failed to send reaction")) }
+        val toggleReactionSuccess = lambdaRecorder { _: String, _: EventOrTransactionId -> Result.success(Unit) }
+        val toggleReactionFailure =
+            lambdaRecorder { _: String, _: EventOrTransactionId -> Result.failure<Unit>(IllegalStateException("Failed to send reaction")) }
 
         val timeline = FakeTimeline().apply {
             this.toggleReactionLambda = toggleReactionSuccess
@@ -185,23 +185,23 @@ class MessagesPresenterTest {
         }.test {
             skipItems(1)
             val initialState = awaitItem()
-            initialState.eventSink(MessagesEvents.ToggleReaction("👍", A_UNIQUE_ID))
+            initialState.eventSink(MessagesEvents.ToggleReaction("👍", AN_EVENT_ID.toEventOrTransactionId()))
             assert(toggleReactionSuccess)
                 .isCalledOnce()
-                .with(value("👍"), value(A_UNIQUE_ID))
+                .with(value("👍"), value(AN_EVENT_ID.toEventOrTransactionId()))
             // No crashes when sending a reaction failed
             timeline.apply { toggleReactionLambda = toggleReactionFailure }
-            initialState.eventSink(MessagesEvents.ToggleReaction("👍", A_UNIQUE_ID))
+            initialState.eventSink(MessagesEvents.ToggleReaction("👍", AN_EVENT_ID.toEventOrTransactionId()))
             assert(toggleReactionFailure)
                 .isCalledOnce()
-                .with(value("👍"), value(A_UNIQUE_ID))
+                .with(value("👍"), value(AN_EVENT_ID.toEventOrTransactionId()))
         }
     }
 
     @Test
     fun `present - handle toggling a reaction twice`() = runTest {
         val coroutineDispatchers = testCoroutineDispatchers(useUnconfinedTestDispatcher = true)
-        val toggleReactionSuccess = lambdaRecorder { _: String, _: UniqueId -> Result.success(Unit) }
+        val toggleReactionSuccess = lambdaRecorder { _: String, _: EventOrTransactionId -> Result.success(Unit) }
 
         val timeline = FakeTimeline().apply {
             this.toggleReactionLambda = toggleReactionSuccess
@@ -220,13 +220,13 @@ class MessagesPresenterTest {
             presenter.present()
         }.test {
             val initialState = awaitItem()
-            initialState.eventSink(MessagesEvents.ToggleReaction("👍", A_UNIQUE_ID))
-            initialState.eventSink(MessagesEvents.ToggleReaction("👍", A_UNIQUE_ID))
+            initialState.eventSink(MessagesEvents.ToggleReaction("👍", AN_EVENT_ID.toEventOrTransactionId()))
+            initialState.eventSink(MessagesEvents.ToggleReaction("👍", AN_EVENT_ID.toEventOrTransactionId()))
             assert(toggleReactionSuccess)
                 .isCalledExactly(2)
                 .withSequence(
-                    listOf(value("👍"), value(A_UNIQUE_ID)),
-                    listOf(value("👍"), value(A_UNIQUE_ID)),
+                    listOf(value("👍"), value(AN_EVENT_ID.toEventOrTransactionId())),
+                    listOf(value("👍"), value(AN_EVENT_ID.toEventOrTransactionId())),
                 )
             skipItems(1)
         }
@@ -335,9 +335,9 @@ class MessagesPresenterTest {
             val initialState = awaitItem()
             val mediaMessage = aMessageEvent(
                 content = TimelineItemImageContent(
-                    body = "image.jpg",
-                    formatted = null,
-                    filename = null,
+                    filename = "image.jpg",
+                    caption = null,
+                    formattedCaption = null,
                     mediaSource = MediaSource(AN_AVATAR_URL),
                     thumbnailSource = null,
                     mimeType = MimeTypes.Jpeg,
@@ -374,9 +374,9 @@ class MessagesPresenterTest {
             val initialState = awaitItem()
             val mediaMessage = aMessageEvent(
                 content = TimelineItemVideoContent(
-                    body = "video.mp4",
-                    formatted = null,
-                    filename = null,
+                    filename = "video.mp4",
+                    caption = null,
+                    formattedCaption = null,
                     duration = 10.milliseconds,
                     videoSource = MediaSource(AN_AVATAR_URL),
                     thumbnailSource = MediaSource(AN_AVATAR_URL),
@@ -414,7 +414,9 @@ class MessagesPresenterTest {
             val initialState = awaitItem()
             val mediaMessage = aMessageEvent(
                 content = TimelineItemFileContent(
-                    body = "file.pdf",
+                    filename = "file.pdf",
+                    caption = null,
+                    formattedCaption = null,
                     fileSource = MediaSource(AN_AVATAR_URL),
                     thumbnailSource = MediaSource(AN_AVATAR_URL),
                     formattedFileSize = "10 MB",
@@ -450,8 +452,7 @@ class MessagesPresenterTest {
             composerRecorder.assertSingle(
                 MessageComposerEvents.SetMode(
                     composerMode = MessageComposerMode.Edit(
-                        eventId = AN_EVENT_ID,
-                        transactionId = null,
+                        eventOrTransactionId = AN_EVENT_ID.toEventOrTransactionId(),
                         content = (aMessageEvent().content as TimelineItemTextContent).body
                     )
                 )
@@ -504,7 +505,7 @@ class MessagesPresenterTest {
             canUserPinUnpinResult = { Result.success(true) },
         )
 
-        val redactEventLambda = lambdaRecorder { _: EventId?, _: TransactionId?, _: String? -> Result.success(Unit) }
+        val redactEventLambda = lambdaRecorder { _: EventOrTransactionId, _: String? -> Result.success(Unit) }
         liveTimeline.redactEventLambda = redactEventLambda
         val presenter = createMessagesPresenter(
             matrixRoom = matrixRoom,
@@ -519,7 +520,7 @@ class MessagesPresenterTest {
             awaitItem()
             assert(redactEventLambda)
                 .isCalledOnce()
-                .with(value(messageEvent.eventId), value(messageEvent.transactionId), value(null))
+                .with(value(messageEvent.eventOrTransactionId), value(null))
         }
     }
 
@@ -1004,7 +1005,7 @@ class MessagesPresenterTest {
         messageComposerPresenter: Presenter<MessageComposerState> = Presenter {
             aMessageComposerState(
                 // Use TextEditorState.Markdown, so that we can request focus manually.
-                textEditorState = TextEditorState.Markdown(MarkdownTextEditorState(initialText = "", initialFocus = false))
+                textEditorState = aTextEditorStateMarkdown(initialText = "", initialFocus = false)
             )
         },
         actionListEventSink: (ActionListEvents) -> Unit = {},

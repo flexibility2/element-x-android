@@ -14,7 +14,6 @@ import io.element.android.libraries.matrix.api.core.RoomAlias
 import io.element.android.libraries.matrix.api.core.RoomId
 import io.element.android.libraries.matrix.api.core.SessionId
 import io.element.android.libraries.matrix.api.core.TransactionId
-import io.element.android.libraries.matrix.api.core.UniqueId
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.encryption.identity.IdentityStateChange
 import io.element.android.libraries.matrix.api.media.AudioInfo
@@ -38,6 +37,7 @@ import io.element.android.libraries.matrix.api.room.powerlevels.MatrixRoomPowerL
 import io.element.android.libraries.matrix.api.room.powerlevels.UserRoleChange
 import io.element.android.libraries.matrix.api.timeline.ReceiptType
 import io.element.android.libraries.matrix.api.timeline.Timeline
+import io.element.android.libraries.matrix.api.timeline.item.event.EventOrTransactionId
 import io.element.android.libraries.matrix.api.widget.MatrixWidgetDriver
 import io.element.android.libraries.matrix.api.widget.MatrixWidgetSettings
 import io.element.android.libraries.matrix.test.A_ROOM_ID
@@ -87,7 +87,16 @@ class FakeMatrixRoom(
     private val canRedactOtherResult: (UserId) -> Result<Boolean> = { lambdaError() },
     private val canSendStateResult: (UserId, StateEventType) -> Result<Boolean> = { _, _ -> lambdaError() },
     private val canUserSendMessageResult: (UserId, MessageEventType) -> Result<Boolean> = { _, _ -> lambdaError() },
-    private val sendMediaResult: (ProgressCallback?) -> Result<FakeMediaUploadHandler> = { lambdaError() },
+    private val sendImageResult: (File, File?, ImageInfo, String?, String?, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
+        { _, _, _, _, _, _ -> lambdaError() },
+    private val sendVideoResult: (File, File?, VideoInfo, String?, String?, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
+        { _, _, _, _, _, _ -> lambdaError() },
+    private val sendFileResult: (File, FileInfo, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
+        { _, _, _ -> lambdaError() },
+    private val sendAudioResult: (File, AudioInfo, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
+        { _, _, _ -> lambdaError() },
+    private val sendVoiceMessageResult: (File, AudioInfo, List<Float>, ProgressCallback?) -> Result<FakeMediaUploadHandler> =
+        { _, _, _, _ -> lambdaError() },
     private val setNameResult: (String) -> Result<Unit> = { lambdaError() },
     private val setTopicResult: (String) -> Result<Unit> = { lambdaError() },
     private val updateAvatarResult: (String, ByteArray) -> Result<Unit> = { _, _ -> lambdaError() },
@@ -95,7 +104,7 @@ class FakeMatrixRoom(
     private val editMessageLambda: (EventId, String, String?, List<IntentionalMention>) -> Result<Unit> = { _, _, _, _ -> lambdaError() },
     private val sendMessageResult: (String, String?, List<IntentionalMention>) -> Result<Unit> = { _, _, _ -> lambdaError() },
     private val updateUserRoleResult: () -> Result<Unit> = { lambdaError() },
-    private val toggleReactionResult: (String, UniqueId) -> Result<Unit> = { _, _ -> lambdaError() },
+    private val toggleReactionResult: (String, EventOrTransactionId) -> Result<Unit> = { _, _ -> lambdaError() },
     private val retrySendMessageResult: (TransactionId) -> Result<Unit> = { lambdaError() },
     private val cancelSendResult: (TransactionId) -> Result<Unit> = { lambdaError() },
     private val forwardEventResult: (EventId, List<RoomId>) -> Result<Unit> = { _, _ -> lambdaError() },
@@ -236,8 +245,8 @@ class FakeMatrixRoom(
         sendMessageResult(body, htmlBody, intentionalMentions)
     }
 
-    override suspend fun toggleReaction(emoji: String, uniqueId: UniqueId): Result<Unit> {
-        return toggleReactionResult(emoji, uniqueId)
+    override suspend fun toggleReaction(emoji: String, eventOrTransactionId: EventOrTransactionId): Result<Unit> {
+        return toggleReactionResult(emoji, eventOrTransactionId)
     }
 
     override suspend fun retrySendMessage(transactionId: TransactionId): Result<Unit> = simulateLongTask {
@@ -315,7 +324,17 @@ class FakeMatrixRoom(
         body: String?,
         formattedBody: String?,
         progressCallback: ProgressCallback?
-    ): Result<MediaUploadHandler> = fakeSendMedia(progressCallback)
+    ): Result<MediaUploadHandler> = simulateLongTask {
+        simulateSendMediaProgress(progressCallback)
+        sendImageResult(
+            file,
+            thumbnailFile,
+            imageInfo,
+            body,
+            formattedBody,
+            progressCallback,
+        )
+    }
 
     override suspend fun sendVideo(
         file: File,
@@ -324,32 +343,53 @@ class FakeMatrixRoom(
         body: String?,
         formattedBody: String?,
         progressCallback: ProgressCallback?
-    ): Result<MediaUploadHandler> = fakeSendMedia(
-        progressCallback
-    )
+    ): Result<MediaUploadHandler> = simulateLongTask {
+        simulateSendMediaProgress(progressCallback)
+        sendVideoResult(
+            file,
+            thumbnailFile,
+            videoInfo,
+            body,
+            formattedBody,
+            progressCallback,
+        )
+    }
 
     override suspend fun sendAudio(
         file: File,
         audioInfo: AudioInfo,
         progressCallback: ProgressCallback?
-    ): Result<MediaUploadHandler> = fakeSendMedia(progressCallback)
+    ): Result<MediaUploadHandler> = simulateLongTask {
+        simulateSendMediaProgress(progressCallback)
+        sendAudioResult(
+            file,
+            audioInfo,
+            progressCallback,
+        )
+    }
 
     override suspend fun sendFile(
         file: File,
         fileInfo: FileInfo,
         progressCallback: ProgressCallback?
-    ): Result<MediaUploadHandler> = fakeSendMedia(progressCallback)
-
-    override suspend fun forwardEvent(eventId: EventId, roomIds: List<RoomId>): Result<Unit> = simulateLongTask {
-        forwardEventResult(eventId, roomIds)
+    ): Result<MediaUploadHandler> = simulateLongTask {
+        simulateSendMediaProgress(progressCallback)
+        sendFileResult(
+            file,
+            fileInfo,
+            progressCallback,
+        )
     }
 
-    private suspend fun fakeSendMedia(progressCallback: ProgressCallback?): Result<MediaUploadHandler> = simulateLongTask {
+    private suspend fun simulateSendMediaProgress(progressCallback: ProgressCallback?) {
         progressCallbackValues.forEach { (current, total) ->
             progressCallback?.onProgress(current, total)
             delay(1)
         }
-        sendMediaResult(progressCallback)
+    }
+
+    override suspend fun forwardEvent(eventId: EventId, roomIds: List<RoomId>): Result<Unit> = simulateLongTask {
+        forwardEventResult(eventId, roomIds)
     }
 
     override suspend fun updateAvatar(mimeType: String, data: ByteArray): Result<Unit> = simulateLongTask {
@@ -472,7 +512,15 @@ class FakeMatrixRoom(
         audioInfo: AudioInfo,
         waveform: List<Float>,
         progressCallback: ProgressCallback?
-    ): Result<MediaUploadHandler> = fakeSendMedia(progressCallback)
+    ): Result<MediaUploadHandler> = simulateLongTask {
+        simulateSendMediaProgress(progressCallback)
+        sendVoiceMessageResult(
+            file,
+            audioInfo,
+            waveform,
+            progressCallback,
+        )
+    }
 
     override suspend fun typingNotice(isTyping: Boolean): Result<Unit> {
         return typingNoticeResult(isTyping)

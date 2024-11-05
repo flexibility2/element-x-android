@@ -301,6 +301,8 @@ private fun TimelineItemEventRowContent(
                 Modifier
                     .constrainAs(sender) {
                         top.linkTo(parent.top)
+                        // Required for correct RTL layout
+                        start.linkTo(parent.start)
                     }
                     .padding(horizontal = 16.dp)
                     .zIndex(1f)
@@ -323,7 +325,12 @@ private fun TimelineItemEventRowContent(
         MessageEventBubble(
             modifier = Modifier
                 .constrainAs(message) {
-                    top.linkTo(sender.bottom, margin = NEGATIVE_MARGIN_FOR_BUBBLE)
+                    val topMargin = if (bubbleState.cutTopStart) {
+                        NEGATIVE_MARGIN_FOR_BUBBLE
+                    } else {
+                        0.dp
+                    }
+                    top.linkTo(sender.bottom, margin = topMargin)
                     if (event.isMine) {
                         end.linkTo(parent.end, margin = 16.dp)
                     } else {
@@ -520,32 +527,33 @@ private fun MessageEventBubbleContent(
     fun CommonLayout(
         timestampPosition: TimestampPosition,
         showThreadDecoration: Boolean,
+        paddingBehaviour: ContentPadding,
         inReplyToDetails: InReplyToDetails?,
         modifier: Modifier = Modifier,
         canShrinkContent: Boolean = false,
     ) {
-        val timestampLayoutModifier: Modifier
-        val contentModifier: Modifier
-        when {
-            inReplyToDetails != null -> {
-                if (timestampPosition == TimestampPosition.Overlay) {
-                    timestampLayoutModifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
-                    contentModifier = Modifier.clip(RoundedCornerShape(12.dp))
+        val timestampLayoutModifier =
+            if (inReplyToDetails != null && timestampPosition == TimestampPosition.Overlay) {
+                Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            } else {
+                Modifier
+            }
+
+        val topPadding = if (inReplyToDetails != null) 0.dp else 8.dp
+        val contentModifier = when (paddingBehaviour) {
+            ContentPadding.Textual ->
+                Modifier.padding(start = 12.dp, end = 12.dp, top = topPadding, bottom = 8.dp)
+            ContentPadding.Media -> {
+                if (inReplyToDetails == null) {
+                    Modifier
                 } else {
-                    contentModifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 0.dp, bottom = 8.dp)
-                    timestampLayoutModifier = Modifier
+                    Modifier.clip(RoundedCornerShape(10.dp))
                 }
             }
-            timestampPosition != TimestampPosition.Overlay -> {
-                timestampLayoutModifier = Modifier
-                contentModifier = Modifier
-                    .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
-            }
-            else -> {
-                timestampLayoutModifier = Modifier
-                contentModifier = Modifier
-            }
+            ContentPadding.CaptionedMedia ->
+                Modifier.padding(start = 8.dp, end = 8.dp, top = topPadding, bottom = 8.dp)
         }
+
         val threadDecoration = @Composable {
             if (showThreadDecoration) {
                 ThreadDecoration(modifier = Modifier.padding(top = 8.dp, start = 12.dp, end = 12.dp))
@@ -599,9 +607,17 @@ private fun MessageEventBubbleContent(
         is TimelineItemPollContent -> TimestampPosition.Below
         else -> TimestampPosition.Default
     }
+    val paddingBehaviour = when (event.content) {
+        is TimelineItemImageContent -> if (event.content.showCaption) ContentPadding.CaptionedMedia else ContentPadding.Media
+        is TimelineItemVideoContent -> if (event.content.showCaption) ContentPadding.CaptionedMedia else ContentPadding.Media
+        is TimelineItemStickerContent,
+        is TimelineItemLocationContent -> ContentPadding.Media
+        else -> ContentPadding.Textual
+    }
     CommonLayout(
         showThreadDecoration = event.isThreaded,
         timestampPosition = timestampPosition,
+        paddingBehaviour = paddingBehaviour,
         inReplyToDetails = event.inReplyTo,
         canShrinkContent = event.content is TimelineItemVoiceContent,
         modifier = bubbleModifier.semantics(mergeDescendants = true) {
@@ -629,7 +645,7 @@ internal fun TimelineItemEventRowPreview() = ElementPreview {
             ATimelineItemEventRow(
                 event = aTimelineItemEvent(
                     isMine = isMine,
-                    content = aTimelineItemImageContent().copy(
+                    content = aTimelineItemImageContent(
                         aspectRatio = 2.5f
                     ),
                     groupPosition = TimelineItemGroupPosition.Last,

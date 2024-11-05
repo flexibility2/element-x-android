@@ -125,9 +125,13 @@ class AndroidMediaPreProcessor @Inject constructor(
             val compressionResult = imageCompressor.compressToTmpFile(
                 inputStreamProvider = { contentResolver.openInputStream(uri)!! },
                 resizeMode = ResizeMode.Approximate(IMAGE_SCALE_REF_SIZE, IMAGE_SCALE_REF_SIZE),
+                mimeType = mimeType,
                 orientation = orientation,
             ).getOrThrow()
-            val thumbnailResult = thumbnailFactory.createImageThumbnail(compressionResult.file)
+            val thumbnailResult = thumbnailFactory.createImageThumbnail(
+                file = compressionResult.file,
+                mimeType = mimeType,
+            )
             val imageInfo = compressionResult.toImageInfo(
                 mimeType = mimeType,
                 thumbnailResult = thumbnailResult
@@ -142,7 +146,10 @@ class AndroidMediaPreProcessor @Inject constructor(
 
         suspend fun processImageWithoutCompression(): MediaUploadInfo {
             val file = copyToTmpFile(uri)
-            val thumbnailResult = thumbnailFactory.createImageThumbnail(file)
+            val thumbnailResult = thumbnailFactory.createImageThumbnail(
+                file = file,
+                mimeType = mimeType,
+            )
             val imageInfo = contentResolver.openInputStream(uri).use { input ->
                 val bitmap = BitmapFactory.decodeStream(input, null, null)!!
                 ImageInfo(
@@ -171,17 +178,13 @@ class AndroidMediaPreProcessor @Inject constructor(
     }
 
     private suspend fun processVideo(uri: Uri, mimeType: String?, shouldBeCompressed: Boolean): MediaUploadInfo {
-        val resultFile = if (shouldBeCompressed) {
-            videoCompressor.compress(uri)
-                .onEach {
-                    // TODO handle progress
-                }
-                .filterIsInstance<VideoTranscodingEvent.Completed>()
-                .first()
-                .file
-        } else {
-            copyToTmpFile(uri)
-        }
+        val resultFile = videoCompressor.compress(uri, shouldBeCompressed)
+            .onEach {
+                // TODO handle progress
+            }
+            .filterIsInstance<VideoTranscodingEvent.Completed>()
+            .first()
+            .file
         val thumbnailInfo = thumbnailFactory.createVideoThumbnail(resultFile)
         val videoInfo = extractVideoMetadata(resultFile, mimeType, thumbnailInfo)
         return MediaUploadInfo.Video(
@@ -207,12 +210,44 @@ class AndroidMediaPreProcessor @Inject constructor(
 
     private fun removeSensitiveImageMetadata(file: File) {
         // Remove GPS info, user comments and subject location tags
-        val exifInterface = ExifInterface(file)
-        // See ExifInterface.TAG_GPS_INFO_IFD_POINTER
-        exifInterface.setAttribute("GPSInfoIFDPointer", null)
-        exifInterface.setAttribute(ExifInterface.TAG_USER_COMMENT, null)
-        exifInterface.setAttribute(ExifInterface.TAG_SUBJECT_LOCATION, null)
-        tryOrNull { exifInterface.saveAttributes() }
+        ExifInterface(file).apply {
+            // See ExifInterface.TAG_GPS_INFO_IFD_POINTER
+            setAttribute("GPSInfoIFDPointer", null)
+            setAttribute(ExifInterface.TAG_USER_COMMENT, null)
+            setAttribute(ExifInterface.TAG_IMAGE_DESCRIPTION, null)
+
+            setAttribute(ExifInterface.TAG_GPS_VERSION_ID, null)
+            setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, null)
+            setAttribute(ExifInterface.TAG_GPS_ALTITUDE, null)
+            setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, null)
+            setAttribute(ExifInterface.TAG_GPS_DATESTAMP, null)
+            setAttribute(ExifInterface.TAG_GPS_SATELLITES, null)
+            setAttribute(ExifInterface.TAG_GPS_STATUS, null)
+            setAttribute(ExifInterface.TAG_GPS_MEASURE_MODE, null)
+            setAttribute(ExifInterface.TAG_GPS_DOP, null)
+            setAttribute(ExifInterface.TAG_GPS_SPEED_REF, null)
+            setAttribute(ExifInterface.TAG_GPS_SPEED, null)
+            setAttribute(ExifInterface.TAG_GPS_TRACK_REF, null)
+            setAttribute(ExifInterface.TAG_GPS_TRACK, null)
+            setAttribute(ExifInterface.TAG_GPS_IMG_DIRECTION_REF, null)
+            setAttribute(ExifInterface.TAG_GPS_IMG_DIRECTION, null)
+            setAttribute(ExifInterface.TAG_GPS_MAP_DATUM, null)
+            setAttribute(ExifInterface.TAG_GPS_DEST_BEARING_REF, null)
+            setAttribute(ExifInterface.TAG_GPS_DEST_BEARING, null)
+            setAttribute(ExifInterface.TAG_GPS_DEST_DISTANCE_REF, null)
+            setAttribute(ExifInterface.TAG_GPS_DEST_DISTANCE, null)
+            setAttribute(ExifInterface.TAG_GPS_PROCESSING_METHOD, null)
+            setAttribute(ExifInterface.TAG_GPS_AREA_INFORMATION, null)
+            setAttribute(ExifInterface.TAG_GPS_DIFFERENTIAL, null)
+            setAttribute(ExifInterface.TAG_GPS_H_POSITIONING_ERROR, null)
+            setAttribute(ExifInterface.TAG_GPS_LATITUDE, null)
+            setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, null)
+            setAttribute(ExifInterface.TAG_GPS_LONGITUDE, null)
+            setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, null)
+            setAttribute(ExifInterface.TAG_GPS_DEST_LONGITUDE, null)
+            setAttribute(ExifInterface.TAG_GPS_DEST_LONGITUDE_REF, null)
+            tryOrNull { saveAttributes() }
+        }
     }
 
     private suspend fun createTmpFileWithInput(inputStream: InputStream): File? {

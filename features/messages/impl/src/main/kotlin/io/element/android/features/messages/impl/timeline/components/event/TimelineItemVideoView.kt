@@ -76,8 +76,8 @@ fun TimelineItemVideoView(
     ) {
         val containerModifier = if (content.showCaption) {
             Modifier
-                .padding(top = 6.dp)
-                .clip(RoundedCornerShape(6.dp))
+                    .padding(top = 6.dp)
+                    .clip(RoundedCornerShape(6.dp))
         } else {
             Modifier
         }
@@ -93,12 +93,12 @@ fun TimelineItemVideoView(
                 var isLoaded by remember { mutableStateOf(false) }
                 AsyncImage(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .then(if (isLoaded) Modifier.background(Color.White) else Modifier),
+                            .fillMaxWidth()
+                            .then(if (isLoaded) Modifier.background(Color.White) else Modifier),
                     model = MediaRequestData(
                         source = content.thumbnailSource,
                         kind = MediaRequestData.Kind.File(
-                            body = content.filename ?: content.body,
+                            fileName = content.filename,
                             mimeType = content.mimeType
                         )
                     ),
@@ -126,7 +126,9 @@ fun TimelineItemVideoView(
             val caption = if (LocalInspectionMode.current) {
                 SpannedString(content.caption)
             } else {
-                content.formatted?.body?.takeIf { content.formatted.format == MessageFormat.HTML } ?: SpannedString(content.caption)
+                content.formattedCaption?.body
+                    ?.takeIf { content.formattedCaption.format == MessageFormat.HTML }
+                    ?: SpannedString(content.caption)
             }
             CompositionLocalProvider(
                 LocalContentColor provides ElementTheme.colors.textPrimary,
@@ -135,6 +137,7 @@ fun TimelineItemVideoView(
                 val aspectRatio = content.aspectRatio ?: DEFAULT_ASPECT_RATIO
                 EditorStyledText(
                     modifier = Modifier
+                        .padding(horizontal = 4.dp) // This is (12.dp - 8.dp) contentPadding from CommonLayout
                         .widthIn(min = MIN_HEIGHT_IN_DP.dp * aspectRatio, max = MAX_HEIGHT_IN_DP.dp * aspectRatio),
                     text = caption,
                     style = ElementRichTextEditorStyle.textStyle(),
@@ -178,7 +181,7 @@ internal fun TimelineVideoWithCaptionRowPreview() = ElementPreview {
                     isMine = isMine,
                     content = aTimelineItemVideoContent().copy(
                         filename = "video.mp4",
-                        body = "A long caption that may wrap into several lines",
+                        caption = "A long caption that may wrap into several lines",
                         aspectRatio = 2.5f,
                     ),
                     groupPosition = TimelineItemGroupPosition.Last,
@@ -190,7 +193,7 @@ internal fun TimelineVideoWithCaptionRowPreview() = ElementPreview {
                 isMine = false,
                 content = aTimelineItemVideoContent().copy(
                     filename = "video.mp4",
-                    body = "Video with null aspect ratio",
+                    caption = "Video with null aspect ratio",
                     aspectRatio = null,
                 ),
                 groupPosition = TimelineItemGroupPosition.Last,

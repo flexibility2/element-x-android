@@ -9,9 +9,6 @@ package io.element.android.features.messages.impl.crypto.identity
 
 import com.google.common.truth.Truth.assertThat
 import io.element.android.libraries.designsystem.components.avatar.AvatarSize
-import io.element.android.libraries.featureflag.api.FeatureFlagService
-import io.element.android.libraries.featureflag.api.FeatureFlags
-import io.element.android.libraries.featureflag.test.FakeFeatureFlagService
 import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.encryption.EncryptionService
 import io.element.android.libraries.matrix.api.encryption.identity.IdentityState
@@ -69,44 +66,7 @@ class IdentityChangeStatePresenterTest {
     }
 
     @Test
-    fun `present - when the room emits identity change, but the feature is disabled, the presenter emits new state`() = runTest {
-        val room = FakeMatrixRoom(
-            isEncrypted = true,
-        )
-        val featureFlagService = FakeFeatureFlagService(
-            initialState = mapOf(
-                FeatureFlags.IdentityPinningViolationNotifications.key to false,
-            )
-        )
-        val presenter = createIdentityChangeStatePresenter(
-            room = room,
-            featureFlagService = featureFlagService,
-        )
-        presenter.test {
-            val initialState = awaitItem()
-            assertThat(initialState.roomMemberIdentityStateChanges).isEmpty()
-            room.emitIdentityStateChanges(
-                listOf(
-                    IdentityStateChange(
-                        userId = A_USER_ID_2,
-                        identityState = IdentityState.PinViolation,
-                    ),
-                )
-            )
-            // No item emitted.
-            expectNoEvents()
-            // Enable the feature
-            featureFlagService.setFeatureEnabled(FeatureFlags.IdentityPinningViolationNotifications, true)
-            val finalItem = awaitItem()
-            assertThat(finalItem.roomMemberIdentityStateChanges).hasSize(1)
-            val value = finalItem.roomMemberIdentityStateChanges.first()
-            assertThat(value.identityRoomMember.userId).isEqualTo(A_USER_ID_2)
-            assertThat(value.identityState).isEqualTo(IdentityState.PinViolation)
-        }
-    }
-
-    @Test
-    fun `present - when the clear room emits identity change, the presenter does not emits new state`() = runTest {
+    fun `present - when the clear room emits identity change, the presenter does not emit new state`() = runTest {
         val room = FakeMatrixRoom(isEncrypted = false)
         val presenter = createIdentityChangeStatePresenter(room)
         presenter.test {
@@ -128,6 +88,7 @@ class IdentityChangeStatePresenterTest {
             assertThat(finalItem.roomMemberIdentityStateChanges).hasSize(1)
             val value = finalItem.roomMemberIdentityStateChanges.first()
             assertThat(value.identityRoomMember.userId).isEqualTo(A_USER_ID_2)
+            assertThat(value.identityRoomMember.displayNameOrDefault).isEqualTo(A_USER_ID_2.extractedDisplayName)
             assertThat(value.identityState).isEqualTo(IdentityState.PinViolation)
         }
     }
@@ -163,14 +124,14 @@ class IdentityChangeStatePresenterTest {
                 assertThat(finalItem.roomMemberIdentityStateChanges).hasSize(1)
                 val value = finalItem.roomMemberIdentityStateChanges.first()
                 assertThat(value.identityRoomMember.userId).isEqualTo(A_USER_ID_2)
-                assertThat(value.identityRoomMember.disambiguatedDisplayName).isEqualTo("Alice")
+                assertThat(value.identityRoomMember.displayNameOrDefault).isEqualTo("Alice")
                 assertThat(value.identityRoomMember.avatarData.size).isEqualTo(AvatarSize.ComposerAlert)
                 assertThat(value.identityState).isEqualTo(IdentityState.PinViolation)
             }
         }
 
     @Test
-    fun `present - when the user pin the identity, the presenter invokes the encryption service api`() =
+    fun `present - when the user pins the identity, the presenter invokes the encryption service api`() =
         runTest {
             val lambda = lambdaRecorder<UserId, Result<Unit>> { Result.success(Unit) }
             val encryptionService = FakeEncryptionService(
@@ -187,16 +148,10 @@ class IdentityChangeStatePresenterTest {
     private fun createIdentityChangeStatePresenter(
         room: MatrixRoom = FakeMatrixRoom(),
         encryptionService: EncryptionService = FakeEncryptionService(),
-        featureFlagService: FeatureFlagService = FakeFeatureFlagService(
-            initialState = mapOf(
-                FeatureFlags.IdentityPinningViolationNotifications.key to true,
-            )
-        ),
     ): IdentityChangeStatePresenter {
         return IdentityChangeStatePresenter(
             room = room,
             encryptionService = encryptionService,
-            featureFlagService = featureFlagService,
         )
     }
 }

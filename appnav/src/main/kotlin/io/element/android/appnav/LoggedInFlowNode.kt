@@ -42,8 +42,10 @@ import com.bumble.appyx.core.plugin.Plugin
 import com.bumble.appyx.core.plugin.plugins
 import com.bumble.appyx.navmodel.backstack.BackStack
 import com.bumble.appyx.navmodel.backstack.activeElement
+import com.bumble.appyx.navmodel.backstack.operation.pop
 import com.bumble.appyx.navmodel.backstack.operation.push
 import com.bumble.appyx.navmodel.backstack.operation.replace
+import com.bumble.appyx.navmodel.backstack.operation.singleTop
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import im.vector.app.features.analytics.plan.JoinedRoom
@@ -68,6 +70,7 @@ import io.element.android.features.roomlist.api.RoomListEntryPoint
 import io.element.android.features.securebackup.api.SecureBackupEntryPoint
 import io.element.android.features.share.api.ShareEntryPoint
 import io.element.android.features.userprofile.api.UserProfileEntryPoint
+import io.element.android.features.verifysession.api.IncomingVerificationEntryPoint
 import io.element.android.libraries.architecture.BackstackView
 import io.element.android.libraries.architecture.BaseFlowNode
 import io.element.android.libraries.architecture.createNode
@@ -84,6 +87,8 @@ import io.element.android.libraries.matrix.api.core.UserId
 import io.element.android.libraries.matrix.api.core.toRoomIdOrAlias
 import io.element.android.libraries.matrix.api.permalink.PermalinkData
 import io.element.android.libraries.matrix.api.sync.SyncState
+import io.element.android.libraries.matrix.api.verification.SessionVerificationRequestDetails
+import io.element.android.libraries.matrix.api.verification.SessionVerificationServiceListener
 import io.element.android.libraries.preferences.api.store.EnableNativeSlidingSyncUseCase
 import io.element.android.services.appnavstate.api.AppNavigationStateService
 import kotlinx.coroutines.CoroutineScope
@@ -117,6 +122,7 @@ class LoggedInFlowNode @AssistedInject constructor(
     private val matrixClient: MatrixClient,
     private val sendingQueue: SendQueues,
     private val logoutEntryPoint: LogoutEntryPoint,
+    private val incomingVerificationEntryPoint: IncomingVerificationEntryPoint,
     private val enableNativeSlidingSyncUseCase: EnableNativeSlidingSyncUseCase,
     snackbarDispatcher: SnackbarDispatcher,
 ) : BaseFlowNode<LoggedInFlowNode.NavTarget>(
@@ -141,6 +147,12 @@ class LoggedInFlowNode @AssistedInject constructor(
         matrixClient.roomMembershipObserver(),
     )
 
+    private val verificationListener = object : SessionVerificationServiceListener {
+        override fun onIncomingSessionRequest(sessionVerificationRequestDetails: SessionVerificationRequestDetails) {
+            backstack.singleTop(NavTarget.IncomingVerificationRequest(sessionVerificationRequestDetails))
+        }
+    }
+
     override fun onBuilt() {
         super.onBuilt()
         lifecycle.subscribe(
@@ -149,6 +161,7 @@ class LoggedInFlowNode @AssistedInject constructor(
                 // TODO We do not support Space yet, so directly navigate to main space
                 appNavigationStateService.onNavigateToSpace(id, MAIN_SPACE)
                 loggedInFlowProcessor.observeEvents(coroutineScope)
+                matrixClient.sessionVerificationService().setListener(verificationListener)
 
                 ftueService.state
                     .onEach { ftueState ->
@@ -170,6 +183,7 @@ class LoggedInFlowNode @AssistedInject constructor(
                 appNavigationStateService.onLeavingSpace(id)
                 appNavigationStateService.onLeavingSession(id)
                 loggedInFlowProcessor.stopObserving()
+                matrixClient.sessionVerificationService().setListener(null)
             }
         )
         observeSyncStateAndNetworkStatus()
@@ -250,6 +264,9 @@ class LoggedInFlowNode @AssistedInject constructor(
 
         @Parcelize
         data object LogoutForNativeSlidingSyncMigrationNeeded : NavTarget
+
+        @Parcelize
+        data class IncomingVerificationRequest(val data: SessionVerificationRequestDetails) : NavTarget
     }
 
     private val showBottomBarState = mutableStateOf(true)
@@ -280,7 +297,7 @@ class LoggedInFlowNode @AssistedInject constructor(
                     }
 
                     override fun onSetUpRecoveryClick() {
-                        backstack.push(NavTarget.SecureBackup(initialElement = SecureBackupEntryPoint.InitialTarget.SetUpRecovery))
+                        backstack.push(NavTarget.SecureBackup(initialElement = SecureBackupEntryPoint.InitialTarget.Root))
                     }
 
                     override fun onSessionConfirmRecoveryKeyClick() {
@@ -450,6 +467,16 @@ class LoggedInFlowNode @AssistedInject constructor(
                         enableNativeSlidingSyncUseCase()
                     }
                     .callback(callback)
+                    .build()
+            }
+            is NavTarget.IncomingVerificationRequest -> {
+                incomingVerificationEntryPoint.nodeBuilder(this, buildContext)
+                    .params(IncomingVerificationEntryPoint.Params(navTarget.data))
+                    .callback(object : IncomingVerificationEntryPoint.Callback {
+                        override fun onDone() {
+                            backstack.pop()
+                        }
+                    })
                     .build()
             }
         }

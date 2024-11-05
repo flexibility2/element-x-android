@@ -69,9 +69,7 @@ fun TimelineItemImageView(
         modifier = modifier.semantics { contentDescription = description },
     ) {
         val containerModifier = if (content.showCaption) {
-            Modifier
-                .padding(top = 6.dp)
-                .clip(RoundedCornerShape(6.dp))
+            Modifier.clip(RoundedCornerShape(10.dp))
         } else {
             Modifier
         }
@@ -91,7 +89,7 @@ fun TimelineItemImageView(
                     model = MediaRequestData(
                         source = content.preferredMediaSource,
                         kind = MediaRequestData.Kind.File(
-                            body = content.filename ?: content.body,
+                            fileName = content.filename,
                             mimeType = content.mimeType,
                         ),
                     ),
@@ -108,7 +106,9 @@ fun TimelineItemImageView(
             val caption = if (LocalInspectionMode.current) {
                 SpannedString(content.caption)
             } else {
-                content.formatted?.body?.takeIf { content.formatted.format == MessageFormat.HTML } ?: SpannedString(content.caption)
+                content.formattedCaption?.body
+                    ?.takeIf { content.formattedCaption.format == MessageFormat.HTML }
+                    ?: SpannedString(content.caption)
             }
             CompositionLocalProvider(
                 LocalContentColor provides ElementTheme.colors.textPrimary,
@@ -117,6 +117,7 @@ fun TimelineItemImageView(
                 val aspectRatio = content.aspectRatio ?: DEFAULT_ASPECT_RATIO
                 EditorStyledText(
                     modifier = Modifier
+                        .padding(horizontal = 4.dp) // This is (12.dp - 8.dp) contentPadding from CommonLayout
                         .widthIn(min = MIN_HEIGHT_IN_DP.dp * aspectRatio, max = MAX_HEIGHT_IN_DP.dp * aspectRatio),
                     text = caption,
                     style = ElementRichTextEditorStyle.textStyle(),
@@ -158,9 +159,9 @@ internal fun TimelineImageWithCaptionRowPreview() = ElementPreview {
             ATimelineItemEventRow(
                 event = aTimelineItemEvent(
                     isMine = isMine,
-                    content = aTimelineItemImageContent().copy(
+                    content = aTimelineItemImageContent(
                         filename = "image.jpg",
-                        body = "A long caption that may wrap into several lines",
+                        caption = "A long caption that may wrap into several lines",
                         aspectRatio = 2.5f,
                     ),
                     groupPosition = TimelineItemGroupPosition.Last,
@@ -170,9 +171,9 @@ internal fun TimelineImageWithCaptionRowPreview() = ElementPreview {
         ATimelineItemEventRow(
             event = aTimelineItemEvent(
                 isMine = false,
-                content = aTimelineItemImageContent().copy(
+                content = aTimelineItemImageContent(
                     filename = "image.jpg",
-                    body = "Image with null aspectRatio",
+                    caption = "Image with null aspectRatio",
                     aspectRatio = null,
                 ),
                 groupPosition = TimelineItemGroupPosition.Last,

@@ -53,6 +53,7 @@ import io.element.android.libraries.matrix.api.room.draft.ComposerDraft
 import io.element.android.libraries.matrix.api.room.draft.ComposerDraftType
 import io.element.android.libraries.matrix.api.room.isDm
 import io.element.android.libraries.matrix.api.timeline.TimelineException
+import io.element.android.libraries.matrix.api.timeline.item.event.toEventOrTransactionId
 import io.element.android.libraries.matrix.ui.messages.RoomMemberProfilesCache
 import io.element.android.libraries.matrix.ui.messages.reply.InReplyToDetails
 import io.element.android.libraries.matrix.ui.messages.reply.map
@@ -168,7 +169,7 @@ class MessageComposerPresenter @Inject constructor(
             handlePickedMedia(attachmentsState, uri, mimeType)
         }
         val filesPicker = mediaPickerProvider.registerFilePicker(AnyMimeTypes) { uri ->
-            handlePickedMedia(attachmentsState, uri, compressIfPossible = false)
+            handlePickedMedia(attachmentsState, uri)
         }
         val cameraPhotoPicker = mediaPickerProvider.registerCameraPhotoPicker { uri ->
             handlePickedMedia(attachmentsState, uri, MimeTypes.IMAGE_JPEG)
@@ -293,7 +294,6 @@ class MessageComposerPresenter @Inject constructor(
                             name = null,
                             formattedFileSize = null
                         ),
-                        compressIfPossible = true
                     ),
                     attachmentState = attachmentsState,
                 )
@@ -442,12 +442,11 @@ class MessageComposerPresenter @Inject constructor(
                 intentionalMentions = message.intentionalMentions
             )
             is MessageComposerMode.Edit -> {
-                val eventId = capturedMode.eventId
-                val transactionId = capturedMode.transactionId
                 timelineController.invokeOnCurrentTimeline {
                     // First try to edit the message in the current timeline
-                    editMessage(eventId, transactionId, message.markdown, message.html, message.intentionalMentions)
+                    editMessage(capturedMode.eventOrTransactionId, message.markdown, message.html, message.intentionalMentions)
                         .onFailure { cause ->
+                            val eventId = capturedMode.eventOrTransactionId.eventId
                             if (cause is TimelineException.EventNotFound && eventId != null) {
                                 // if the event is not found in the timeline, try to edit the message directly
                                 room.editMessage(eventId, message.markdown, message.html, message.intentionalMentions)
@@ -493,7 +492,6 @@ class MessageComposerPresenter @Inject constructor(
         attachmentsState: MutableState<AttachmentsState>,
         uri: Uri?,
         mimeType: String? = null,
-        compressIfPossible: Boolean = true,
     ) {
         if (uri == null) {
             attachmentsState.value = AttachmentsState.None
@@ -505,7 +503,7 @@ class MessageComposerPresenter @Inject constructor(
             name = null,
             formattedFileSize = null
         )
-        val mediaAttachment = Attachment.Media(localMedia, compressIfPossible)
+        val mediaAttachment = Attachment.Media(localMedia)
         val isPreviewable = when {
             MimeTypes.isImage(localMedia.info.mimeType) -> true
             MimeTypes.isVideo(localMedia.info.mimeType) -> true
@@ -535,7 +533,6 @@ class MessageComposerPresenter @Inject constructor(
         mediaSender.sendMedia(
             uri = uri,
             mimeType = mimeType,
-            compressIfPossible = false,
             progressCallback = progressCallback
         ).getOrThrow()
     }
@@ -581,8 +578,7 @@ class MessageComposerPresenter @Inject constructor(
         when (val draftType = draft.draftType) {
             ComposerDraftType.NewMessage -> messageComposerContext.composerMode = MessageComposerMode.Normal
             is ComposerDraftType.Edit -> messageComposerContext.composerMode = MessageComposerMode.Edit(
-                eventId = draftType.eventId,
-                transactionId = null,
+                eventOrTransactionId = draftType.eventId.toEventOrTransactionId(),
                 content = htmlText ?: markdownText
             )
             is ComposerDraftType.Reply -> {
@@ -611,7 +607,7 @@ class MessageComposerPresenter @Inject constructor(
         val draftType = when (val mode = messageComposerContext.composerMode) {
             is MessageComposerMode.Normal -> ComposerDraftType.NewMessage
             is MessageComposerMode.Edit -> {
-                mode.eventId?.let { eventId -> ComposerDraftType.Edit(eventId) }
+                mode.eventOrTransactionId.eventId?.let { eventId -> ComposerDraftType.Edit(eventId) }
             }
             is MessageComposerMode.Reply -> ComposerDraftType.Reply(mode.eventId)
         }
