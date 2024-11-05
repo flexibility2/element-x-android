@@ -8,6 +8,7 @@
 package io.element.android.features.login.impl
 
 import android.app.Activity
+import android.net.Uri
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -125,7 +126,20 @@ class LoginFlowNode @AssistedInject constructor(
             NavTarget.Root -> {
                 if (inputs.flowType == LoginFlowType.SIGN_IN_QR_CODE) {
                     createNode<QrCodeLoginFlowNode>(buildContext)
-                } else {
+                } else if(inputs.flowType == LoginFlowType.SIGN_UP){
+                    initializeLoginFlow()
+                    val baseUrl = defaultAccountProvider.url
+                    // 构造正确格式的注册 URL
+                    val encodedHsUrl = Uri.encode(baseUrl)
+                    val registerUrl = "https://develop.element.io/?hs_url=$encodedHsUrl#/mobile_register"
+                    val inputs = CreateAccountNode.Inputs(
+                        url = registerUrl,
+                    )
+                    createNode<CreateAccountNode>(buildContext, listOf(inputs))
+                }
+
+
+                else {
 //                    resolve(NavTarget.ConfirmAccountProvider, buildContext)
                     initializeLoginFlow()
                     resolve(NavTarget.LoginPassword, buildContext)

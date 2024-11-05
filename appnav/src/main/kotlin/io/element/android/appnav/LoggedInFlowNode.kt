@@ -9,8 +9,17 @@ package io.element.android.appnav
 
 import android.content.Intent
 import android.os.Parcelable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,6 +27,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -42,6 +53,7 @@ import io.element.android.appnav.loggedin.SendQueues
 import io.element.android.appnav.room.RoomFlowNode
 import io.element.android.appnav.room.RoomNavigationTarget
 import io.element.android.appnav.room.joined.JoinedRoomLoadedFlowNode
+import io.element.android.compound.tokens.generated.CompoundIcons
 import io.element.android.features.createroom.api.CreateRoomEntryPoint
 import io.element.android.features.ftue.api.FtueEntryPoint
 import io.element.android.features.ftue.api.state.FtueService
@@ -60,7 +72,6 @@ import io.element.android.libraries.architecture.BackstackView
 import io.element.android.libraries.architecture.BaseFlowNode
 import io.element.android.libraries.architecture.createNode
 import io.element.android.libraries.architecture.waitForNavTargetAttached
-import io.element.android.libraries.designsystem.components.BottomNavigationBar
 import io.element.android.libraries.designsystem.utils.snackbar.SnackbarDispatcher
 import io.element.android.libraries.di.AppScope
 import io.element.android.libraries.di.SessionScope
@@ -509,7 +520,7 @@ class LoggedInFlowNode @AssistedInject constructor(
             val selectedItem by selectedItemState
             val showBottomBar by showBottomBarState;
             if(showBottomBar){
-                BottomNavigationBar(
+                BottomNavigationBar2(
                     onHomeClick = { backstack.push(NavTarget.RoomList); selectedItemState.value = 0},
                     onCreateRoomClick = { backstack.push(NavTarget.CreateRoom); selectedItemState.value = 1 },
                     onSettingsClick = { backstack.push(NavTarget.Settings()); selectedItemState.value = 2 },
@@ -527,4 +538,62 @@ class LoggedInFlowNode @AssistedInject constructor(
         @Assisted buildContext: BuildContext,
         @Assisted plugins: List<Plugin>,
     ) : Node(buildContext, plugins = plugins)
+}
+
+@Composable
+fun BottomNavigationBar2(
+    onHomeClick: () -> Unit,
+    onCreateRoomClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    height: Dp = 72.dp,
+    selectedItem: Int = 0
+) {
+    BottomAppBar(
+        modifier = modifier.height(height),
+        content = {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .padding(top = 1.dp), // 增加顶部内边距,使图标更靠近顶部
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    IconButton(
+                        onClick = onHomeClick,
+                        modifier = Modifier.padding(top = 0.dp) // 移除图标按钮的顶部内边距
+                    ) {
+                        Icon(
+                            imageVector = CompoundIcons.Chat(),
+                            contentDescription = "Home",
+                            tint = if (selectedItem == 0) Color(0xFF23EA22) else LocalContentColor.current
+                        )
+                    }
+                    IconButton(
+                        onClick = onCreateRoomClick,
+                        modifier = Modifier.padding(top = 0.dp) // 移除图标按钮的顶部内边距
+                    ) {
+                        Icon(
+                            imageVector = CompoundIcons.UserAdd(),
+                            contentDescription = "Create Room",
+                            tint = if (selectedItem == 1) Color(0xFF23EA22) else LocalContentColor.current
+                        )
+                    }
+                    IconButton(
+                        onClick = onSettingsClick,
+                        modifier = Modifier.padding(top = 0.dp) // 移除图标按钮的顶部内边距
+                    ) {
+                        Icon(
+                            imageVector = CompoundIcons.Settings(),
+                            contentDescription = "Settings",
+                            tint = if (selectedItem == 2) Color(0xFF23EA22) else LocalContentColor.current
+                        )
+                    }
+                }
+            }
+        }
+    )
 }
