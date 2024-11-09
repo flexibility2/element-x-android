@@ -9,6 +9,7 @@ package io.element.android.features.login.impl.screens.createaccount
 
 import android.annotation.SuppressLint
 import android.view.ViewGroup
+import android.webkit.ConsoleMessage
 import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -130,11 +131,13 @@ private fun CreateAccountWebView(
             factory = { context ->
                 WebView(context).apply {
                     onWebViewCreate(this)
+//                    Timber.d("wxt, WebView loading URL: ${state.url}")
                     setup(state)
                 }
             },
             update = { webView ->
                 if (webView.url != state.url) {
+//                    Timber.d("wxt, WebView loading URL: ${state.url}")
                     webView.loadUrl(state.url)
                 }
             },
@@ -147,6 +150,10 @@ private fun CreateAccountWebView(
 
 @SuppressLint("SetJavaScriptEnabled")
 private fun WebView.setup(state: CreateAccountState) {
+    // 添加 WebView 调试功能
+//    if (state.isDebugBuild) {
+//        WebView.setWebContentsDebuggingEnabled(true)
+//    }
     layoutParams = ViewGroup.LayoutParams(
         ViewGroup.LayoutParams.MATCH_PARENT,
         ViewGroup.LayoutParams.MATCH_PARENT
@@ -154,6 +161,11 @@ private fun WebView.setup(state: CreateAccountState) {
     with(settings) {
         javaScriptEnabled = true
         domStorageEnabled = true
+        // 添加更多设置
+//        javaScriptCanOpenWindowsAutomatically = true
+//        allowFileAccess = true
+//        allowContentAccess = true
+//        databaseEnabled = true
     }
 
     webChromeClient = object : WebChromeClient() {
@@ -161,6 +173,11 @@ private fun WebView.setup(state: CreateAccountState) {
             super.onProgressChanged(view, newProgress)
             state.eventSink(CreateAccountEvents.SetPageProgress(newProgress))
         }
+
+//        override fun onConsoleMessage(message: ConsoleMessage): Boolean {
+//            Timber.d("wxt, Console: ${message.message()}")
+//            return true
+//        }
 
         override fun onJsBeforeUnload(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
             Timber.w("onJsBeforeUnload, cancelling the dialog, we will open external links in a Custom Chrome Tab")

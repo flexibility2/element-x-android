@@ -14,6 +14,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import timber.log.Timber
 
 class WebViewMessageInterceptor(
     webView: WebView,
@@ -45,6 +46,52 @@ class WebViewMessageInterceptor(
                           },
                           false,
                         );
+                                                // 添加修改标题的代码
+                                                function modifyTitle() {
+                                                    const titles = document.querySelectorAll('h1');
+                                                    titles.forEach(title => {
+                                                        if (title.textContent.includes('create an account')) {
+                                                            title.textContent = 'Your Info';
+                                                        }
+                                                    });
+                                                    
+                                                // 修改注册按钮颜色
+                                                const submitButton = document.querySelector('.mx_Login_submit');
+                                                if (submitButton) {
+                                                    submitButton.style.backgroundColor = '#23EA22';
+                                                    // 可能还需要覆盖其他样式
+                                                    submitButton.style.border = 'none';  // 移除边框
+                                                    submitButton.style.color = '#282828';  // 设置文字颜色为白色
+                                                }                                                   
+
+                                                }
+                                                
+                                                // 立即执行一次
+                                                modifyTitle();
+                        // 使用 MutationObserver 监听 DOM 变化
+                        const observer = new MutationObserver((mutations) => {
+                            modifyTitle();
+                        });
+                        
+                        // 开始观察
+                        observer.observe(document.body, {
+                            childList: true,
+                            subtree: true
+                        });
+                    """.trimIndent(),
+                    null
+                )
+            }
+
+            // 添加 onPageFinished 回调
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+//                Timber.d("wxt, Page finished loading: $url")  // 添加日志
+
+                // 页面加载完成后再次尝试修改
+                view?.evaluateJavascript(
+                    """
+                        modifyTitle();
                     """.trimIndent(),
                     null
                 )
@@ -57,6 +104,8 @@ class WebViewMessageInterceptor(
                 return true
             }
         }
+
+//        WebView.setWebContentsDebuggingEnabled(true)
 
         // Use WebMessageListener if supported, otherwise use JavascriptInterface
         if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {

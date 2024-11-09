@@ -49,6 +49,7 @@ import io.element.android.libraries.oidc.api.OidcEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import timber.log.Timber
 
 @ContributesNode(AppScope::class)
 class LoginFlowNode @AssistedInject constructor(
@@ -132,6 +133,8 @@ class LoginFlowNode @AssistedInject constructor(
                     // 构造正确格式的注册 URL
                     val encodedHsUrl = Uri.encode(baseUrl)
                     val registerUrl = "https://develop.element.io/?hs_url=$encodedHsUrl#/mobile_register"
+//                    Timber.d("wxt, Register URL: $registerUrl")
+
                     val inputs = CreateAccountNode.Inputs(
                         url = registerUrl,
                     )
