@@ -110,13 +110,31 @@ class RoomListDataSource @Inject constructor(
     }
 
     private fun buildAndCacheItem(roomSummaries: List<RoomSummary>, index: Int): RoomListRoomSummary? {
-        val roomListSummary = roomSummaries.getOrNull(index)?.let { roomListRoomSummaryFactory.create(it) }
+        val roomSummary = roomSummaries.getOrNull(index) ?: return null
+        val roomListSummary = roomListRoomSummaryFactory.create(roomSummary).copy(
+            isPinned = pinnedRooms.contains(roomSummary.roomId)
+        )
         diffCache[index] = roomListSummary
         return roomListSummary
     }
 
     private suspend fun rebuildAllRoomSummaries() {
         lock.withLock {
+            roomListService.allRooms.summaries.replayCache.firstOrNull()?.let { roomSummaries ->
+                buildAndEmitAllRooms(roomSummaries, useCache = false)
+            }
+        }
+    }
+
+    private val pinnedRooms = mutableSetOf<RoomId>()
+
+    suspend fun updateRoomPinState(roomId: RoomId, isPinned: Boolean) = withContext(coroutineDispatchers.main) {
+        lock.withLock {
+            if (isPinned) {
+                pinnedRooms.add(roomId)
+            } else {
+                pinnedRooms.remove(roomId)
+            }
             roomListService.allRooms.summaries.replayCache.firstOrNull()?.let { roomSummaries ->
                 buildAndEmitAllRooms(roomSummaries, useCache = false)
             }

@@ -179,6 +179,12 @@ private fun RoomsViewList(
     LaunchedEffect(visibleRange) {
         updatedEventSink(RoomListEvents.UpdateVisibleRange(visibleRange))
     }
+    val sortedRooms = remember(state.summaries) {
+        state.summaries.sortedWith(
+            compareByDescending<RoomListRoomSummary> { it.isPinned }
+                .thenByDescending { it.timestamp }
+        )
+    }
     LazyColumn(
         state = lazyListState,
         modifier = modifier,
@@ -220,7 +226,7 @@ private fun RoomsViewList(
         // Note: do not use a key for the LazyColumn, or the scroll will not behave as expected if a room
         // is moved to the top of the list.
         itemsIndexed(
-            items = state.summaries,
+            items = sortedRooms,
             contentType = { _, room -> room.contentType() },
         ) { index, room ->
             RoomSummaryRow(
@@ -228,7 +234,7 @@ private fun RoomsViewList(
                 onClick = onRoomClick,
                 eventSink = eventSink,
             )
-            if (index != state.summaries.lastIndex) {
+            if (index != sortedRooms.lastIndex) {
                 HorizontalDivider()
             }
         }

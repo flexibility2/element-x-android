@@ -146,6 +146,9 @@ class RoomListPresenter @Inject constructor(
                         AcceptDeclineInviteEvents.DeclineInvite(event.roomListRoomSummary.toInviteData())
                     )
                 }
+                is RoomListEvents.SetRoomIsPinned -> {
+                    coroutineScope.setRoomIsPinned(event.roomId, event.isPinned)
+                }
             }
         }
 
@@ -257,6 +260,7 @@ class RoomListPresenter @Inject constructor(
             roomName = event.roomListRoomSummary.name,
             isDm = event.roomListRoomSummary.isDm,
             isFavorite = event.roomListRoomSummary.isFavorite,
+            isPinned = event.roomListRoomSummary.isPinned,
             markAsUnreadFeatureFlagEnabled = featureFlagService.isFeatureEnabled(FeatureFlags.MarkAsUnread),
             hasNewContent = event.roomListRoomSummary.hasNewContent
         )
@@ -332,6 +336,10 @@ class RoomListPresenter @Inject constructor(
             }
             roomListDataSource.subscribeToVisibleRooms(roomIds)
         }
+    }
+
+    private fun CoroutineScope.setRoomIsPinned(roomId: RoomId, isPinned: Boolean) = launch {
+        roomListDataSource.updateRoomPinState(roomId, isPinned)
     }
 }
 

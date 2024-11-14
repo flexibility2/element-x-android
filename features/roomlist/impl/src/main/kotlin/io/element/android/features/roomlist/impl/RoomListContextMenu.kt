@@ -61,6 +61,9 @@ fun RoomListContextMenu(
             onFavoriteChange = { isFavorite ->
                 eventSink(RoomListEvents.SetRoomIsFavorite(contextMenu.roomId, isFavorite))
             },
+            onPinChange = { isPinned ->
+                eventSink(RoomListEvents.SetRoomIsPinned(contextMenu.roomId, isPinned))
+            },
         )
     }
 }
@@ -71,6 +74,7 @@ private fun RoomListModalBottomSheetContent(
     onRoomSettingsClick: () -> Unit,
     onLeaveRoomClick: () -> Unit,
     onFavoriteChange: (isFavorite: Boolean) -> Unit,
+    onPinChange: (isPinned: Boolean) -> Unit,
     onRoomMarkReadClick: () -> Unit,
     onRoomMarkUnreadClick: () -> Unit,
 ) {
@@ -144,6 +148,30 @@ private fun RoomListModalBottomSheetContent(
         ListItem(
             headlineContent = {
                 Text(
+                    text = "Pin",
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            },
+            leadingContent = ListItemContent.Icon(
+                iconSource = IconSource.Vector(
+                    CompoundIcons.Pin(),
+                    contentDescription = "Pin",
+                )
+            ),
+            trailingContent = ListItemContent.Switch(
+                checked = contextMenu.isPinned,
+                onChange = { isPinned ->
+                    onPinChange(isPinned)
+                },
+            ),
+            onClick = {
+                onPinChange(!contextMenu.isPinned)
+            },
+            style = ListItemStyle.Primary,
+        )
+        ListItem(
+            headlineContent = {
+                Text(
                     text = stringResource(id = CommonStrings.common_settings),
                     style = MaterialTheme.typography.bodyLarge,
                 )
@@ -195,5 +223,6 @@ internal fun RoomListModalBottomSheetContentPreview(
         onRoomSettingsClick = {},
         onLeaveRoomClick = {},
         onFavoriteChange = {},
+        onPinChange = {},
     )
 }

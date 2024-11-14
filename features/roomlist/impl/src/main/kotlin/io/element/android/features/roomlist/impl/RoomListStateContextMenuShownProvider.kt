@@ -24,6 +24,7 @@ internal fun aContextMenuShown(
     isDm: Boolean = false,
     hasNewContent: Boolean = false,
     isFavorite: Boolean = false,
+    isPinned: Boolean = false,
 ) = RoomListState.ContextMenu.Shown(
     roomId = RoomId("!aRoom:aDomain"),
     roomName = roomName,
@@ -31,4 +32,5 @@ internal fun aContextMenuShown(
     markAsUnreadFeatureFlagEnabled = true,
     hasNewContent = hasNewContent,
     isFavorite = isFavorite,
+    isPinned = isPinned,
 )
