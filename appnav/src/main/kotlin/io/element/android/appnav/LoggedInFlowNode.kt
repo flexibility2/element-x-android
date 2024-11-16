@@ -548,10 +548,21 @@ class LoggedInFlowNode @AssistedInject constructor(
             val showBottomBar by showBottomBarState;
             if(showBottomBar){
                 BottomNavigationBar2(
-                    onHomeClick = { backstack.push(NavTarget.RoomList); selectedItemState.value = 0},
-                    onCreateRoomClick = { backstack.push(NavTarget.CreateRoom); selectedItemState.value = 1 },
-                    onSettingsClick = { backstack.push(NavTarget.Settings()); selectedItemState.value = 2 },
-                    modifier = Modifier.align(Alignment.BottomCenter).height(72.dp),
+                    onHomeClick = { 
+                        backstack.singleTop(NavTarget.RoomList)
+                        selectedItemState.value = 0
+                    },
+                    onCreateRoomClick = { 
+                        backstack.push(NavTarget.CreateRoom)
+                        selectedItemState.value = 1 
+                    },
+                    onSettingsClick = { 
+                        backstack.push(NavTarget.Settings())
+                        selectedItemState.value = 2 
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .height(72.dp),
                     selectedItem = selectedItem
                 )
             }
@@ -586,12 +597,12 @@ fun BottomNavigationBar2(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.TopCenter)
-                        .padding(top = 1.dp), // 增加顶部内边距,使图标更靠近顶部
+                        .padding(top = 1.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     IconButton(
                         onClick = onHomeClick,
-                        modifier = Modifier.padding(top = 0.dp) // 移除图标按钮的顶部内边距
+                        modifier = Modifier.padding(top = 0.dp)
                     ) {
                         Icon(
                             imageVector = CompoundIcons.Chat(),
@@ -601,7 +612,7 @@ fun BottomNavigationBar2(
                     }
                     IconButton(
                         onClick = onCreateRoomClick,
-                        modifier = Modifier.padding(top = 0.dp) // 移除图标按钮的顶部内边距
+                        modifier = Modifier.padding(top = 0.dp)
                     ) {
                         Icon(
                             imageVector = CompoundIcons.UserAdd(),
@@ -611,7 +622,7 @@ fun BottomNavigationBar2(
                     }
                     IconButton(
                         onClick = onSettingsClick,
-                        modifier = Modifier.padding(top = 0.dp) // 移除图标按钮的顶部内边距
+                        modifier = Modifier.padding(top = 0.dp)
                     ) {
                         Icon(
                             imageVector = CompoundIcons.Settings(),
