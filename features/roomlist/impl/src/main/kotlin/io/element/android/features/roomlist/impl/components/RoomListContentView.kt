@@ -8,6 +8,7 @@
 package io.element.android.features.roomlist.impl.components
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -188,7 +190,6 @@ private fun RoomsViewList(
     LazyColumn(
         state = lazyListState,
         modifier = modifier,
-        // FAB height is 56dp, bottom padding is 16dp, we add 8dp as extra margin -> 56+16+8 = 80
         contentPadding = PaddingValues(bottom = 80.dp)
     ) {
         when (state.securityBannerState) {
@@ -223,8 +224,6 @@ private fun RoomsViewList(
             }
         }
 
-        // Note: do not use a key for the LazyColumn, or the scroll will not behave as expected if a room
-        // is moved to the top of the list.
         itemsIndexed(
             items = sortedRooms,
             contentType = { _, room -> room.contentType() },
@@ -233,6 +232,13 @@ private fun RoomsViewList(
                 room = room,
                 onClick = onRoomClick,
                 eventSink = eventSink,
+                modifier = Modifier.background(
+                    if (room.isPinned) {
+                        Color(0xFFF8F8F8)
+                    } else {
+                        Color.Transparent
+                    }
+                )
             )
             if (index != sortedRooms.lastIndex) {
                 HorizontalDivider()

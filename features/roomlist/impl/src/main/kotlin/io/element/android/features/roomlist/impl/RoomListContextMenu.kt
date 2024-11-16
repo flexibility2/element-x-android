@@ -64,6 +64,7 @@ fun RoomListContextMenu(
             onPinChange = { isPinned ->
                 eventSink(RoomListEvents.SetRoomIsPinned(contextMenu.roomId, isPinned))
             },
+            eventSink = { event -> eventSink(event as RoomListEvents.ContextMenuEvents) },
         )
     }
 }
@@ -77,6 +78,7 @@ private fun RoomListModalBottomSheetContent(
     onPinChange: (isPinned: Boolean) -> Unit,
     onRoomMarkReadClick: () -> Unit,
     onRoomMarkUnreadClick: () -> Unit,
+    eventSink: (RoomListEvents) -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -121,30 +123,30 @@ private fun RoomListModalBottomSheetContent(
                 )
             }
         }
-        ListItem(
-            headlineContent = {
-                Text(
-                    text = stringResource(id = CommonStrings.common_favourite),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-            },
-            leadingContent = ListItemContent.Icon(
-                iconSource = IconSource.Vector(
-                    CompoundIcons.Favourite(),
-                    contentDescription = stringResource(id = CommonStrings.common_favourite),
-                )
-            ),
-            trailingContent = ListItemContent.Switch(
-                checked = contextMenu.isFavorite,
-                onChange = { isFavorite ->
-                    onFavoriteChange(isFavorite)
-                },
-            ),
-            onClick = {
-                onFavoriteChange(!contextMenu.isFavorite)
-            },
-            style = ListItemStyle.Primary,
-        )
+//        ListItem(
+//            headlineContent = {
+//                Text(
+//                    text = stringResource(id = CommonStrings.common_favourite),
+//                    style = MaterialTheme.typography.bodyLarge,
+//                )
+//            },
+//            leadingContent = ListItemContent.Icon(
+//                iconSource = IconSource.Vector(
+//                    CompoundIcons.Favourite(),
+//                    contentDescription = stringResource(id = CommonStrings.common_favourite),
+//                )
+//            ),
+//            trailingContent = ListItemContent.Switch(
+//                checked = contextMenu.isFavorite,
+//                onChange = { isFavorite ->
+//                    onFavoriteChange(isFavorite)
+//                },
+//            ),
+//            onClick = {
+//                onFavoriteChange(!contextMenu.isFavorite)
+//            },
+//            style = ListItemStyle.Primary,
+//        )
         ListItem(
             headlineContent = {
                 Text(
@@ -162,10 +164,12 @@ private fun RoomListModalBottomSheetContent(
                 checked = contextMenu.isPinned,
                 onChange = { isPinned ->
                     onPinChange(isPinned)
+                    eventSink(RoomListEvents.HideContextMenu)
                 },
             ),
             onClick = {
                 onPinChange(!contextMenu.isPinned)
+                eventSink(RoomListEvents.HideContextMenu)
             },
             style = ListItemStyle.Primary,
         )
@@ -224,5 +228,6 @@ internal fun RoomListModalBottomSheetContentPreview(
         onLeaveRoomClick = {},
         onFavoriteChange = {},
         onPinChange = {},
+        eventSink = {},
     )
 }
